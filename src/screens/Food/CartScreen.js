@@ -294,8 +294,8 @@ const CartScreen = ({navigation}) => {
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
       <StatusBar
-        backgroundColor={theme.statusBarBackground}
-        barStyle={theme.statusBarStyle}
+        backgroundColor="#7B2533"
+        barStyle="light-content"
       />
 
       {/* Header */}

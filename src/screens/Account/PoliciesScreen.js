@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ const PoliciesScreen = () => {
   return (
     <>
       <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

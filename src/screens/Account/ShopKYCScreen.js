@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useRef, useState} from 'react';
 import {
   View,
@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   Linking,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
@@ -292,6 +293,7 @@ const ShopKYCScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity

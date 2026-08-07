@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -12,6 +12,7 @@ import {
   TextInput,
   SafeAreaView,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 import Icon from 'react-native-vector-icons/Feather';
@@ -46,7 +47,7 @@ const FoodHomeScreen = ({navigation}) => {
         'https://sangamwholesale.com/api/banners/',
       );
       console.log('Banners response:', response.data);
-      // Backend stores images as array per banner — flatten all images into one list
+      // Backend stores images as array per banner � flatten all images into one list
       const allBanners = response.data.banners || [];
       const flatImages = [];
       allBanners.forEach(banner => {
@@ -236,6 +237,7 @@ const FoodHomeScreen = ({navigation}) => {
 
   return (
     <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <SafeAreaView
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View

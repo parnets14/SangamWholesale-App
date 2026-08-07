@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Platform,
   Alert,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -181,6 +182,7 @@ const BussinessPhotosScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Custom Header */}
       {/* <View style={styles.headerContainer}>
         <TouchableOpacity

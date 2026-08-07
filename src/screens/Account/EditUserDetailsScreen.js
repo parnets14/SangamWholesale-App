@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -385,14 +385,14 @@ const EditUserDetailsScreen = () => {
           {device.name} {device.isCurrent && '(This device)'}
         </Text>
         <Text style={styles.deviceDetails}>
-          {device.brand} {device.model} • {device.os}
+          {device.brand} {device.model} � {device.os}
         </Text>
         <Text style={styles.deviceLastActive}>
           Last active: {new Date(device.lastActive).toLocaleString()}
         </Text>
         {device.location && (
           <View style={styles.deviceLocationRow}>
-            <Icon name="map-pin" size={12} color="#6B7280" />
+            <Icon name="place" size={12} color="#6B7280" />
             <Text style={styles.deviceLocation}> {device.location}</Text>
           </View>
         )}

@@ -1,6 +1,6 @@
 // src/screens/PrivacyPolicyScreen.js
 import React, {useState} from 'react';
-import {View, ScrollView, StyleSheet, Linking, Platform} from 'react-native';
+import {View, ScrollView, StyleSheet, Linking, Platform, StatusBar} from 'react-native';
 import {Button, Text, Checkbox, useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -64,7 +64,9 @@ const PrivacyPolicyScreen = ({navigation, route}) => {
   ];
 
   return (
-    <View style={styles.container}>
+    <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
+      <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
@@ -144,6 +146,7 @@ const PrivacyPolicyScreen = ({navigation, route}) => {
         </View>
       )}
     </View>
+    </>
   );
 };
 

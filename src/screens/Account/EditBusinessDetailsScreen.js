@@ -1,4 +1,4 @@
-ï»¿import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,19 @@ import {
   TextInput,
   Platform,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import BottomSheet from 'react-native-raw-bottom-sheet';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {useAuth} from '../../context/AuthContext';
 
 const {height: windowHeight} = Dimensions.get('window');
 
 const EditBusinessDetailsScreen = () => {
   const navigation = useNavigation();
+  const {token} = useAuth();
   const sheetRef = useRef(null);
   const [sheetContent, setSheetContent] = useState(null);
   const [pan, setPan] = useState('');
@@ -31,11 +34,47 @@ const EditBusinessDetailsScreen = () => {
   const [vacationEndDate, setVacationEndDate] = useState('');
   const [weeklyOffSelection, setWeeklyOffSelection] = useState(null);
   const [nameInfo, setNameInfo] = useState({
-    name: 'Store Name',
-    generalInfo: 'Some general info',
+    name: '',
+    generalInfo: '',
   });
+  const [loadingBusiness, setLoadingBusiness] = useState(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerMode, setDatePickerMode] = useState('start');
+
+  useEffect(() => {
+    const fetchBusiness = async () => {
+      try {
+        const response = await fetch(
+          'https://sangamwholesale.com/api/business/get',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        const data = await response.json();
+        if (data.success && data.business) {
+          setNameInfo({
+            name: data.business.businessName || '',
+            generalInfo: data.business.generalInfo || '',
+          });
+          // Pre-fill GST from registration
+          if (data.business.gstNumber) {
+            setGst(data.business.gstNumber);
+            setSelectedGstExempt('no');
+          } else {
+            setSelectedGstExempt('yes');
+          }
+        }
+      } catch (error) {
+        // silently fail
+      } finally {
+        setLoadingBusiness(false);
+      }
+    };
+    fetchBusiness();
+  }, [token]);
 
   const openBottomSheet = contentKey => {
     setSheetContent(contentKey);
@@ -132,30 +171,14 @@ const EditBusinessDetailsScreen = () => {
       case 'pan_gst':
         return (
           <View style={styles.sheetContentContainer}>
-            {renderHeader('Manage PAN & GSTIN')}
+            {renderHeader('Manage GSTIN')}
             <ScrollView contentContainerStyle={styles.sheetScrollContent}>
-              <Text style={styles.sheetSectionTitle}>PAN</Text>
-              <TouchableOpacity style={styles.addPanButton}>
-                <Text style={styles.addPanButtonText}>ADD PAN</Text>
-              </TouchableOpacity>
-              <Text style={styles.sheetSectionTitle}>GST</Text>
-              <Text style={styles.gstQuestion}>Are you a GST Exempt user?</Text>
-              <TouchableOpacity
-                style={styles.radioOption}
-                onPress={() => setSelectedGstExempt('yes')}>
-                <Text style={styles.radioText}>Yes, I am</Text>
-                <View
-                  style={
-                    selectedGstExempt === 'yes'
-                      ? styles.radioSelected
-                      : styles.radioUnselected
-                  }
-                />
-              </TouchableOpacity>
+              <Text style={styles.sheetSectionTitle}>GST Number</Text>
+              <Text style={styles.gstQuestion}>Do you have a GST number?</Text>
               <TouchableOpacity
                 style={styles.radioOption}
                 onPress={() => setSelectedGstExempt('no')}>
-                <Text style={styles.radioText}>No, I have GSTIN</Text>
+                <Text style={styles.radioText}>Yes, I have GSTIN</Text>
                 <View
                   style={
                     selectedGstExempt === 'no'
@@ -165,8 +188,50 @@ const EditBusinessDetailsScreen = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                style={styles.radioOption}
+                onPress={() => {
+                  setSelectedGstExempt('yes');
+                  setGst('');
+                }}>
+                <Text style={styles.radioText}>No, I am GST exempt</Text>
+                <View
+                  style={
+                    selectedGstExempt === 'yes'
+                      ? styles.radioSelected
+                      : styles.radioUnselected
+                  }
+                />
+              </TouchableOpacity>
+
+              {selectedGstExempt === 'no' && (
+                <>
+                  <Text style={styles.sheetSectionTitle}>Enter GSTIN</Text>
+                  <TextInput
+                    style={styles.sheetTextInput}
+                    value={gst}
+                    onChangeText={text => setGst(text.toUpperCase())}
+                    placeholder="e.g. 22ABCDE1234F1Z5"
+                    placeholderTextColor="#9CA3AF"
+                    autoCapitalize="characters"
+                    maxLength={15}
+                  />
+                </>
+              )}
+
+              <TouchableOpacity
                 style={styles.saveButton}
-                onPress={() => sheetRef.current.close()}>
+                onPress={async () => {
+                  try {
+                    const formData = new FormData();
+                    formData.append('gstNumber', selectedGstExempt === 'no' ? gst.trim() : '');
+                    await fetch('https://sangamwholesale.com/api/business/update', {
+                      method: 'PUT',
+                      headers: {Authorization: `Bearer ${token}`},
+                      body: formData,
+                    });
+                  } catch (e) {}
+                  sheetRef.current.close();
+                }}>
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -266,17 +331,17 @@ const EditBusinessDetailsScreen = () => {
               </View>
               <Text style={styles.howItWorksTitle}>How does it work?</Text>
               <Text style={styles.howItWorksText}>
-                â€¢ To create a new vacation, select 'Start Date' and 'End Date'
+                • To create a new vacation, select 'Start Date' and 'End Date'
                 and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                â€¢ To modify a vacation, update date(s) and click save.
+                • To modify a vacation, update date(s) and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                â€¢ Maximum allowed duration for setting vacation is 30 days.
+                • Maximum allowed duration for setting vacation is 30 days.
               </Text>
               <Text style={styles.howItWorksText}>
-                â€¢ You are allowed to set vacation for a maximum of 40 days in a
+                • You are allowed to set vacation for a maximum of 40 days in a
                 6 month period (each half of the year). Which is 80 days in a
                 year.
               </Text>
@@ -393,32 +458,18 @@ const EditBusinessDetailsScreen = () => {
           <MenuItem
             iconName="file-text"
             title="Name & General Info"
-            subtitle="Store"
+            subtitle={
+              loadingBusiness
+                ? 'Loading...'
+                : nameInfo.name || 'Tap to set'
+            }
             onPress={() => openBottomSheet('name_general_info')}
           />
           <MenuItem
             iconName="credit-card"
-            title="PAN & GST"
-            subtitle="Tap to add"
+            title="GST Number"
+            subtitle={gst ? gst : 'Tap to add'}
             onPress={() => openBottomSheet('pan_gst')}
-          />
-          <MenuItem
-            iconName="clipboard"
-            title="FSSAI"
-            subtitle="Tap to add"
-            onPress={() => openBottomSheet('fssai')}
-          />
-          <MenuItem
-            iconName="file-minus"
-            title="Tax Certificate"
-            subtitle="Download TCS u/s 206C certificates"
-            onPress={() => openBottomSheet('tax_certificate')}
-          />
-          <MenuItem
-            iconName="umbrella"
-            title="Vacation"
-            subtitle="Tap to set"
-            onPress={() => openBottomSheet('vacation')}
           />
           <MenuItem
             iconName="calendar"
@@ -569,7 +620,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sheetTextInput: {
-    backgroundColor: '#7B2533',
+    backgroundColor: '#F9FAFB',
     borderRadius: 8,
     paddingHorizontal: 15,
     paddingVertical: 12,

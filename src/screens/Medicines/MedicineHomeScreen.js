@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -164,8 +164,8 @@ const MedicineHomeScreen = ({navigation}) => {
   return (
     <>
       <StatusBar
-        backgroundColor={theme.statusBarBackground}
-        barStyle={theme.statusBarStyle}
+        backgroundColor="#7B2533"
+        barStyle="light-content"
       />
       <SafeAreaView
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>

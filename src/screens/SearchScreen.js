@@ -11,6 +11,7 @@ import {
   Image,
   ActivityIndicator,
   Share,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -101,6 +102,7 @@ const SearchScreen = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}

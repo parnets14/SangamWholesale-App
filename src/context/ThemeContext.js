@@ -1,4 +1,4 @@
-﻿// src/context/ThemeContext.js
+// src/context/ThemeContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Appearance } from 'react-native';
 
@@ -9,6 +9,13 @@ const themes = {
     backgroundColor: '#ffffff',
     textColor: '#000000',
     statusBarBackground: '#7B2533',
+    headerBackground: '#7B2533',
+    headerTextColor: '#ffffff',
+    primaryColor: '#7B2533',
+    cardBackground: '#ffffff',
+    searchBackground: 'rgba(255,255,255,0.2)',
+    iconColor: '#ffffff',
+    placeholderColor: 'rgba(255,255,255,0.7)',
     statusBarStyle: 'light-content',
     splashBackground: '#7B2533',
     splashText: '#ffffff',
@@ -16,7 +23,14 @@ const themes = {
   dark: {
     backgroundColor: '#1c2526',
     textColor: '#ffffff',
-    statusBarBackground: '#000000',
+    statusBarBackground: '#7B2533',
+    headerBackground: '#7B2533',
+    headerTextColor: '#ffffff',
+    primaryColor: '#7B2533',
+    cardBackground: '#2c3536',
+    searchBackground: 'rgba(255,255,255,0.2)',
+    iconColor: '#ffffff',
+    placeholderColor: 'rgba(255,255,255,0.7)',
     statusBarStyle: 'light-content',
     splashBackground: '#7B2533',
     splashText: '#ffffff',

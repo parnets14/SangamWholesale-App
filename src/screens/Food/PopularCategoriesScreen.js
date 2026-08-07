@@ -37,8 +37,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '1',
       name: 'Premium Basmati Rice',
       brand: 'Organic Farms',
-      price: '₹299',
-      originalPrice: '₹399',
+      price: '299',
+      originalPrice: '399',
       image: require('../../assets/images/rice_poha.jpg'),
       rating: 4.5,
       reviews: 128,
@@ -50,8 +50,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '2',
       name: 'Toor Dal 1kg',
       brand: 'Fresh Harvest',
-      price: '₹89',
-      originalPrice: '₹120',
+      price: '89',
+      originalPrice: '120',
       image: require('../../assets/images/dals_grains.jpeg'),
       rating: 4.3,
       reviews: 95,
@@ -63,8 +63,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '3',
       name: 'Pure Honey 500g',
       brand: 'Nature\'s Best',
-      price: '₹199',
-      originalPrice: '₹250',
+      price: '199',
+      originalPrice: '250',
       image: require('../../assets/images/dry_fruits.jpg'),
       rating: 4.7,
       reviews: 203,
@@ -76,8 +76,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '4',
       name: 'Whole Wheat Flour',
       brand: 'Healthy Grains',
-      price: '₹45',
-      originalPrice: '₹60',
+      price: '45',
+      originalPrice: '60',
       image: require('../../assets/images/aata_maida.jpg'),
       rating: 4.2,
       reviews: 67,
@@ -88,8 +88,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '5',
       name: 'Mixed Spices Pack',
       brand: 'Spice Master',
-      price: '₹75',
-      originalPrice: '₹100',
+      price: '75',
+      originalPrice: '100',
       image: require('../../assets/images/masalas.jpg'),
       rating: 4.4,
       reviews: 89,
@@ -101,8 +101,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       id: '6',
       name: 'Rock Salt 1kg',
       brand: 'Pure Salt',
-      price: '₹25',
-      originalPrice: '₹35',
+      price: '25',
+      originalPrice: '35',
       image: require('../../assets/images/sugar_salt.jpg'),
       rating: 4.1,
       reviews: 45,
@@ -254,8 +254,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
             {/* Price Section */}
             <View style={styles.priceSection}>
               <View style={styles.priceRow}>
-                <Text style={styles.currentPrice}>{item.price}</Text>
-                <Text style={styles.originalPrice}>{item.originalPrice}</Text>
+                <Text style={styles.currentPrice}>₹{item.price}</Text>
+                <Text style={styles.originalPrice}>₹{item.originalPrice}</Text>
               </View>
               <Text style={styles.discountText}>{item.discount}</Text>
             </View>
@@ -399,7 +399,7 @@ const PopularCategoriesScreen = ({navigation, route}) => {
                     {selectedProduct.brand}
                   </Text>
                   <Text style={styles.quantityProductPrice}>
-                    {selectedProduct.price}
+                    ₹{selectedProduct.price}
                   </Text>
                 </View>
               </View>

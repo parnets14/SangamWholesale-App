@@ -59,6 +59,8 @@ const DeliveriesScreen = () => {
             name: item.name,
             quantity: item.quantity,
             unit: 'pieces',
+            image: item.image || null,
+            productId: item.productId || item._id,
           })),
           totalValue: `₹${order.total.toLocaleString()}`,
           status: getDeliveryStatus(order.status),
@@ -261,7 +263,7 @@ const DeliveriesScreen = () => {
               })
             }>
             <Text style={styles.itemText}>
-              • {product.name} - {product.quantity} {product.unit}
+              � {product.name} - {product.quantity} {product.unit}
             </Text>
           </TouchableOpacity>
         ))}
@@ -274,15 +276,17 @@ const DeliveriesScreen = () => {
 
       {/* Product Images */}
       <View style={styles.productImagesRow}>
-        {item.items.map((product, idx) => (
-          <Image
-            key={idx}
-            source={{
-              uri: `https://sangamwholesale.com/products/${product?.image}`,
-            }}
-            style={styles.productImage}
-          />
-        ))}
+        {item.items
+          .filter(product => product.image)
+          .map((product, idx) => (
+            <Image
+              key={idx}
+              source={{
+                uri: `https://sangamwholesale.com/products/${product.image}`,
+              }}
+              style={styles.productImage}
+            />
+          ))}
       </View>
 
       {/* Progress Bar */}
@@ -301,7 +305,7 @@ const DeliveriesScreen = () => {
       {/* Delivery Info */}
       <View style={styles.deliveryInfo}>
         <View style={styles.infoRow}>
-          <Icon name="map-pin" size={16} color="#666" />
+          <Icon name="place" size={16} color="#666" />
           <Text style={styles.infoText} numberOfLines={2}>
             {item.deliveryAddress}
           </Text>

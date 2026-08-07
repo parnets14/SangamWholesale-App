@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -11,6 +11,7 @@ import {
   Alert,
   Platform,
   ToastAndroid,
+  StatusBar,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -92,7 +93,7 @@ const SelectCategoryScreen = () => {
       formData.append('businessType', businessType);
       formData.append('category', selectedCategory);
 
-      // 👇 Attach front and back images as file blobs
+      // ?? Attach front and back images as file blobs
       if (frontPhoto) {
         formData.append('frontImage', {
           uri: frontPhoto,
@@ -219,6 +220,7 @@ const SelectCategoryScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Select Category</Text>
         <View style={styles.categoriesContainer}>
@@ -244,7 +246,7 @@ const SelectCategoryScreen = () => {
                 <View style={styles.checkboxContainer}>
                   {selectedCategory === category.id && (
                     <View style={styles.checkmark}>
-                      <Text style={styles.checkmarkText}>✓</Text>
+                      <Text style={styles.checkmarkText}>?</Text>
                     </View>
                   )}
                 </View>

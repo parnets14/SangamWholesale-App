@@ -10,6 +10,7 @@ import {
   FlatList,
   ActivityIndicator,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
@@ -147,6 +148,7 @@ const ProductListScreen = ({navigation, route}) => {
   return (
     <SafeAreaView
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Header */}
       <View
         style={[

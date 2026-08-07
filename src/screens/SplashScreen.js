@@ -1,4 +1,4 @@
-﻿import React, {useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -61,8 +61,8 @@ const SplashScreen = () => {
   return (
     <>
       <StatusBar
-        backgroundColor={theme.statusBarBackground}
-        barStyle={theme.statusBarStyle}
+        backgroundColor="#7B2533"
+        barStyle="light-content"
       />
       <View
         style={[

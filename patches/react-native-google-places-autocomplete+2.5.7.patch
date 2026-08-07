@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js b/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
+index 60836de..91a7c5c 100644
+--- a/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
++++ b/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
+@@ -904,7 +904,7 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
+     clearButtonMode,
+     InputComp,
+     ...userProps
+-  } = props.textInputProps;
++  } = props.textInputProps || {};
+   const TextInputComp = InputComp || TextInput;
+   return (
+     <View

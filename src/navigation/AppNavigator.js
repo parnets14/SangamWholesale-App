@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {StatusBar} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -294,7 +294,7 @@ const AppNavigator = () => {
             <Stack.Screen name="Wishlist" component={WishlistScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="PopularCategories" component={PopularCategoriesScreen} />
-            {/* SpecialOffers placeholder — uses CategoryScreen until a dedicated screen is built */}
+            {/* SpecialOffers placeholder � uses CategoryScreen until a dedicated screen is built */}
             <Stack.Screen name="SpecialOffers" component={CategoryScreen} />
           </>
         )}

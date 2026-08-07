@@ -1,4 +1,4 @@
-﻿import React, {useState, useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
   ToastAndroid,
+  StatusBar,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -85,6 +86,7 @@ const BusinessDetailsScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"

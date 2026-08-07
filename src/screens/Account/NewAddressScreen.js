@@ -1,4 +1,4 @@
-﻿// CreateAddressScreen.js
+// CreateAddressScreen.js
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
@@ -15,11 +15,14 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import StepIndicator from 'react-native-step-indicator';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from '@react-native-community/geolocation';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import {useAuth} from '../../context/AuthContext';
+
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAHFoepvVjrlMUctcC4wn_VRpOznZBzmhA';
+
 const {height} = Dimensions.get('window');
 
 const NewAddressScreen = ({navigation, route}) => {
@@ -41,8 +44,11 @@ const NewAddressScreen = ({navigation, route}) => {
     latitude: 12.9716,
     longitude: 77.5946,
   });
+  const [mapReady, setMapReady] = useState(false);
 
   const mapRef = useRef(null);
+  const placesRef = useRef(null);
+  // mapRef kept for future map re-integration
 
   const [formData, setFormData] = useState({
     shopName: '',
@@ -68,7 +74,7 @@ const NewAddressScreen = ({navigation, route}) => {
     gstin: '',
   });
 
-  const steps = ['Location', 'Address', 'Timings', 'GST'];
+  const steps = ['Address', 'Timings', 'GST'];
 
   const timeOptions = [
     '09:00 AM',
@@ -133,7 +139,11 @@ const NewAddressScreen = ({navigation, route}) => {
   };
 
   useEffect(() => {
+    // Silently get location in background � doesn't block screen render
     getCurrentLocation();
+    // Delay map mount to avoid blank screen on init
+    const timer = setTimeout(() => setMapReady(true), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -168,31 +178,27 @@ const NewAddressScreen = ({navigation, route}) => {
   }, [isEdit, editAddress]);
 
   const getCurrentLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setSelectedLocation({latitude, longitude});
-        if (mapRef.current) {
-          mapRef.current.animateToRegion(
-            {
-              latitude,
-              longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            },
-            1000,
-          );
-        }
-      },
-      error => {
-        console.log('Error getting location:', error);
-        Alert.alert(
-          'Location Error',
-          'Unable to get current location. Please check location permissions.',
-        );
-      },
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-    );
+    try {
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setSelectedLocation({latitude, longitude});
+          if (mapRef.current) {
+            mapRef.current.animateToRegion(
+              {latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01},
+              1000,
+            );
+          }
+        },
+        error => {
+          console.log('Location error (silent):', error.message);
+          // Keep default Bangalore coords, no alert
+        },
+        {enableHighAccuracy: false, timeout: 10000, maximumAge: 30000},
+      );
+    } catch (e) {
+      console.log('Geolocation unavailable:', e.message);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -222,7 +228,7 @@ const NewAddressScreen = ({navigation, route}) => {
     const newErrors = {};
 
     switch (currentStep) {
-      case 1:
+      case 0:
         if (!formData.shopName.trim())
           newErrors.shopName = 'Shop name is required';
         if (!formData.shopNoRoad.trim())
@@ -239,7 +245,7 @@ const NewAddressScreen = ({navigation, route}) => {
         if (!formData.saveAddressAs.trim())
           newErrors.saveAddressAs = 'Address label is required';
         break;
-      case 2:
+      case 1:
         if (!formData.selectedTime)
           newErrors.selectedTime = 'Please select a time';
         if (!formData.lunchStart && formData.lunchEnd)
@@ -247,7 +253,7 @@ const NewAddressScreen = ({navigation, route}) => {
         if (formData.lunchStart && !formData.lunchEnd)
           newErrors.lunchEnd = 'Please select lunch end time';
         break;
-      case 3:
+      case 2:
         if (formData.gstOption === 'i_want_gst' && !formData.gstin.trim()) {
           newErrors.gstin = 'GSTIN is required';
         } else if (formData.gstOption === 'i_want_gst' && !gstVerified) {
@@ -333,7 +339,7 @@ const NewAddressScreen = ({navigation, route}) => {
             isEdit
               ? 'Address updated successfully!'
               : 'Address created successfully!',
-            [{text: 'OK', onPress: () => navigation.navigate('FoodTab')}],
+            [{text: 'OK', onPress: () => navigation.goBack()}],
           );
         } else {
           Alert.alert('Error', data.message || 'Failed to save address');
@@ -444,156 +450,229 @@ const NewAddressScreen = ({navigation, route}) => {
     </Modal>
   );
 
-  const renderLocationStep = () => (
-    <View style={{flex: 1}}>
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        style={{flex: 1}}
-        initialRegion={{
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        onPress={e => setSelectedLocation(e.nativeEvent.coordinate)}>
-        <Marker
-          coordinate={selectedLocation}
-          title="Delivery Location"
-          description="Your delivery address"
-          pinColor="#7B2533"
-        />
-      </MapView>
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 32,
-          alignSelf: 'center',
-          backgroundColor: '#7B2533',
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 20,
-          paddingVertical: 12,
-          borderRadius: 24,
-          elevation: 4,
-        }}
-        onPress={handleNext}>
-        <Icon name="location-on" size={20} color="#FFF" />
-        <Text
-          style={{
-            color: '#FFF',
-            fontWeight: 'bold',
-            fontSize: 16,
-            marginLeft: 8,
-          }}>
-          Select This Location
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
 
   const renderAddressStep = () => (
-    <ScrollView
-      style={styles.stepContainer}
-      showsVerticalScrollIndicator={false}>
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Shop Name on the Board</Text>
-        <TextInput
-          style={[styles.input, errors.shopName && styles.inputError]}
-          value={formData.shopName}
-          onChangeText={text => handleInputChange('shopName', text)}
-          placeholder="Shop Name on the Board"
-          placeholderTextColor="#9CA3AF"
-        />
-        {errors.shopName && (
-          <Text style={styles.errorText}>{errors.shopName}</Text>
-        )}
-      </View>
+    <View style={{flex: 1}}>
+      {/* Google Places OUTSIDE ScrollView to avoid nested VirtualizedList warning */}
+      <View style={{paddingHorizontal: 16, paddingTop: 12, zIndex: 99}}>
+        <Text style={styles.label}>Search Location</Text>
+        <GooglePlacesAutocomplete
+          placeholder="Search area, street, landmark..."
+          fetchDetails={true}
+          predefinedPlaces={[]}
+          minLength={2}
+          debounce={300}
+          textInputProps={{
+            autoFocus: false,
+            blurOnSubmit: false,
+            placeholderTextColor: '#9CA3AF',
+          }}
+          onPress={(data, details = null) => {
+            if (!details) {
+              console.log('No details returned for:', data?.description);
+              return;
+            }
+            const components = details.address_components || [];
+            console.log('Address components:', components.map(c => ({name: c.long_name, types: c.types})));
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Shop No & Road</Text>
-        <TextInput
-          style={[styles.input, errors.shopNoRoad && styles.inputError]}
-          value={formData.shopNoRoad}
-          onChangeText={text => handleInputChange('shopNoRoad', text)}
-          placeholder="Shop No & Road"
-          placeholderTextColor="#9CA3AF"
-        />
-        {errors.shopNoRoad && (
-          <Text style={styles.errorText}>{errors.shopNoRoad}</Text>
-        )}
-      </View>
+            let area = '';
+            let city = '';
+            let pincode = '';
+            let road = '';
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Area Name</Text>
-        <TextInput
-          style={[styles.input, errors.areaName && styles.inputError]}
-          value={formData.areaName}
-          onChangeText={text => handleInputChange('areaName', text)}
-          placeholder="Area Name"
-          placeholderTextColor="#9CA3AF"
-        />
-        {errors.areaName && (
-          <Text style={styles.errorText}>{errors.areaName}</Text>
-        )}
-      </View>
+            components.forEach(c => {
+              const types = c.types;
+              if (types.includes('route')) {
+                road = c.long_name;
+              }
+              if (
+                types.includes('sublocality_level_1') ||
+                types.includes('sublocality') ||
+                types.includes('neighborhood')
+              ) {
+                if (!area) area = c.long_name;
+              }
+              if (types.includes('locality')) {
+                city = c.long_name;
+              }
+              if (types.includes('postal_code')) {
+                pincode = c.long_name;
+              }
+            });
 
-      <View style={styles.rowContainer}>
-        <View style={[styles.formGroup, {flex: 1, marginRight: 10}]}>
-          <Text style={styles.label}>Pincode</Text>
-          <TextInput
-            style={[styles.input, errors.pincode && styles.inputError]}
-            value={formData.pincode}
-            onChangeText={text => handleInputChange('pincode', text)}
-            placeholder="Pincode"
-            placeholderTextColor="#9CA3AF"
-            keyboardType="numeric"
-            maxLength={6}
-          />
-          {errors.pincode && (
-            <Text style={styles.errorText}>{errors.pincode}</Text>
+            // Fallbacks
+            if (!area) area = data?.structured_formatting?.secondary_text?.split(',')[0] || '';
+            if (!city) {
+              const admin = components.find(c => c.types.includes('administrative_area_level_2'));
+              if (admin) city = admin.long_name;
+            }
+
+            console.log('Parsed ? area:', area, '| city:', city, '| pincode:', pincode);
+
+            if (area) handleInputChange('areaName', area);
+            if (city) handleInputChange('city', city);
+            if (pincode) handleInputChange('pincode', pincode);
+            // Fill shopNoRoad with road name or full formatted address
+            const roadValue = road || details.formatted_address || '';
+            if (roadValue) handleInputChange('shopNoRoad', roadValue);
+          }}
+          onFail={error => console.log('GooglePlaces error:', error)}
+          onNotFound={() => console.log('GooglePlaces: no results')}
+          query={{
+            key: GOOGLE_MAPS_API_KEY,
+            language: 'en',
+          }}
+          styles={{
+            container: {flex: 0, zIndex: 99},
+            textInputContainer: {
+              backgroundColor: '#fff',
+              borderWidth: 1.5,
+              borderColor: '#7B2533',
+              borderRadius: 10,
+              paddingHorizontal: 8,
+            },
+            textInput: {
+              fontSize: 15,
+              color: '#111827',
+              backgroundColor: '#fff',
+              height: 48,
+            },
+            listView: {
+              backgroundColor: '#fff',
+              borderWidth: 1,
+              borderColor: '#E0E0E0',
+              borderRadius: 10,
+              marginTop: 4,
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              zIndex: 999,
+            },
+            row: {
+              paddingVertical: 13,
+              paddingHorizontal: 14,
+              borderBottomWidth: 1,
+              borderBottomColor: '#F3F4F6',
+            },
+            description: {fontSize: 14, color: '#374151'},
+            poweredContainer: {display: 'none'},
+          }}
+          enablePoweredByContainer={false}
+          renderRow={rowData => (
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Icon name="place" size={14} color="#7B2533" style={{marginRight: 8}} />
+              <View style={{flex: 1}}>
+                <Text style={{fontSize: 14, color: '#111827', fontWeight: '500'}} numberOfLines={1}>
+                  {rowData.structured_formatting?.main_text || rowData.description}
+                </Text>
+                <Text style={{fontSize: 12, color: '#6B7280', marginTop: 1}} numberOfLines={1}>
+                  {rowData.structured_formatting?.secondary_text || ''}
+                </Text>
+              </View>
+            </View>
           )}
+        />
+        <Text style={styles.hintText}>
+          Type your area or street to auto-fill address fields below
+        </Text>
+      </View>
+
+      {/* Rest of form in ScrollView � NO nested FlatList issue */}
+      <ScrollView
+        style={styles.stepContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Shop Name on the Board</Text>
+          <TextInput
+            style={[styles.input, errors.shopName && styles.inputError]}
+            value={formData.shopName}
+            onChangeText={text => handleInputChange('shopName', text)}
+            placeholder="Shop Name on the Board"
+            placeholderTextColor="#9CA3AF"
+          />
+          {errors.shopName && <Text style={styles.errorText}>{errors.shopName}</Text>}
         </View>
 
-        <View style={[styles.formGroup, {flex: 1, marginLeft: 10}]}>
-          <Text style={styles.label}>City / Town</Text>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Shop No & Road</Text>
+          <TextInput
+            style={[styles.input, errors.shopNoRoad && styles.inputError]}
+            value={formData.shopNoRoad}
+            onChangeText={text => handleInputChange('shopNoRoad', text)}
+            placeholder="Shop No & Road"
+            placeholderTextColor="#9CA3AF"
+          />
+          {errors.shopNoRoad && <Text style={styles.errorText}>{errors.shopNoRoad}</Text>}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Area Name</Text>
+          <TextInput
+            style={[styles.input, errors.areaName && styles.inputError]}
+            value={formData.areaName}
+            onChangeText={text => handleInputChange('areaName', text)}
+            placeholder="Area Name"
+            placeholderTextColor="#9CA3AF"
+          />
+          {errors.areaName && <Text style={styles.errorText}>{errors.areaName}</Text>}
+        </View>
+
+        <View style={styles.rowContainer}>
+          <View style={[styles.formGroup, {flex: 1, marginRight: 10}]}>
+            <Text style={styles.label}>Pincode</Text>
+            <TextInput
+              style={[styles.input, errors.pincode && styles.inputError]}
+              value={formData.pincode}
+              onChangeText={text => handleInputChange('pincode', text)}
+              placeholder="Pincode"
+              placeholderTextColor="#9CA3AF"
+              keyboardType="numeric"
+              maxLength={6}
+            />
+            {errors.pincode && <Text style={styles.errorText}>{errors.pincode}</Text>}
+          </View>
+          <View style={[styles.formGroup, {flex: 1, marginLeft: 10}]}>
+            <Text style={styles.label}>City / Town</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.city}
+              onChangeText={text => handleInputChange('city', text)}
+              placeholder="City / Town"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Delivery Contact</Text>
           <TextInput
             style={styles.input}
-            value={formData.city}
-            onChangeText={text => handleInputChange('city', text)}
-            placeholder="City / Town"
+            value={formData.deliveryContact}
+            onChangeText={text => handleInputChange('deliveryContact', text)}
+            placeholder="Contact"
             placeholderTextColor="#9CA3AF"
+            keyboardType="numeric"
+            maxLength={10}
           />
         </View>
-      </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Delivery Contact</Text>
-        <TextInput
-          style={[styles.input]}
-          value={formData.deliveryContact}
-          onChangeText={text => handleInputChange('deliveryContact', text)}
-          placeholder="Contact"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="numeric"
-          maxLength={10}
-        />
-      </View>
-
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Save Address As</Text>
-        <TextInput
-          style={[styles.input, errors.saveAddressAs && styles.inputError]}
-          value={formData.saveAddressAs}
-          onChangeText={text => handleInputChange('saveAddressAs', text)}
-          placeholder="Home, Office, Other"
-          placeholderTextColor="#9CA3AF"
-        />
-        {errors.saveAddressAs && (
-          <Text style={styles.errorText}>{errors.saveAddressAs}</Text>
-        )}
-      </View>
-    </ScrollView>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Save Address As</Text>
+          <TextInput
+            style={[styles.input, errors.saveAddressAs && styles.inputError]}
+            value={formData.saveAddressAs}
+            onChangeText={text => handleInputChange('saveAddressAs', text)}
+            placeholder="Home, Office, Other"
+            placeholderTextColor="#9CA3AF"
+          />
+          {errors.saveAddressAs && <Text style={styles.errorText}>{errors.saveAddressAs}</Text>}
+        </View>
+      </ScrollView>
+    </View>
   );
 
   const renderTimingsStep = () => (
@@ -824,12 +903,10 @@ const NewAddressScreen = ({navigation, route}) => {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return renderLocationStep();
-      case 1:
         return renderAddressStep();
-      case 2:
+      case 1:
         return renderTimingsStep();
-      case 3:
+      case 2:
         return renderGSTStep();
       default:
         return null;
@@ -842,7 +919,7 @@ const NewAddressScreen = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#7B2533" />
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" backgroundColor="#7B2533" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -930,6 +1007,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  hintText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 4,
+    marginLeft: 2,
+  },
   mapContainer: {
     height: 200,
     borderRadius: 12,
@@ -956,6 +1039,90 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
     marginLeft: 4,
+  },
+  // Search box styles
+  searchBoxContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: '#FFF',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  searchInput: {
+    fontSize: 14,
+    color: '#2D3748',
+    backgroundColor: '#F7FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingLeft: 36,
+    height: 44,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 10,
+    top: 12,
+    zIndex: 1,
+  },
+  searchListView: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    elevation: 4,
+  },
+  searchRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  searchDescription: {
+    fontSize: 13,
+    color: '#2D3748',
+  },
+  detectLocationBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  detectLocationText: {
+    marginLeft: 6,
+    fontSize: 13,
+    color: '#7B2533',
+    fontWeight: '600',
+  },
+  selectLocationBtn: {
+    position: 'absolute',
+    bottom: 32,
+    alignSelf: 'center',
+    backgroundColor: '#7B2533',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+  },
+  selectLocationText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
   },
   locationCard: {
     backgroundColor: '#FFF',

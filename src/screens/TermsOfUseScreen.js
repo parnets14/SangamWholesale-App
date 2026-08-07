@@ -1,6 +1,6 @@
 // src/screens/TermsOfUseScreen.js
 import React from 'react';
-import {View, ScrollView, StyleSheet, Linking} from 'react-native';
+import {View, ScrollView, StyleSheet, Linking, StatusBar} from 'react-native';
 import {Button, Text} from 'react-native-paper';
 
 const TermsOfUseScreen = ({navigation}) => {
@@ -14,7 +14,9 @@ const TermsOfUseScreen = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
+      <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Terms of Use</Text>
         <Text style={styles.effectiveDate}>Effective: January 1, 2023</Text>
@@ -60,6 +62,7 @@ const TermsOfUseScreen = ({navigation}) => {
         </Button>
       </View>
     </View>
+    </>
   );
 };
 

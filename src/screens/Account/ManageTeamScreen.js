@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ const ManageTeamScreen = () => {
   return (
     <>
       <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -10,6 +10,7 @@ import {
   TextInput,
   SafeAreaView,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
@@ -30,9 +31,13 @@ const CategoryScreen = ({navigation, route}) => {
           'https://sangamwholesale.com/api/subcategories/',
         );
         // Filter subcategories by category._id
-        const filtered = response.data.subcategories.filter(
-          sub => sub.category._id === category._id,
-        );
+        const filtered = response.data.subcategories.filter(sub => {
+          const subCatId =
+            typeof sub.category === 'object' ? sub.category._id : sub.category;
+          const catId =
+            typeof category === 'object' ? category._id : category;
+          return subCatId === catId;
+        });
         setSubCategories(filtered);
       } catch (err) {
         setError('Failed to load subcategories');
@@ -126,6 +131,7 @@ const CategoryScreen = ({navigation, route}) => {
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+          <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
           {/* Header */}
           <View
             style={[
@@ -170,7 +176,7 @@ const CategoryScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          {/* Single FlatList — no ScrollView wrapper to avoid nesting warning */}
+          {/* Single FlatList � no ScrollView wrapper to avoid nesting warning */}
           <FlatList
             data={subCategories.filter(sub =>
               sub.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -312,7 +318,9 @@ const styles = StyleSheet.create({
   },
   verticalList: {
     paddingHorizontal: 8,
+    paddingTop: 12,
     paddingBottom: 20,
+    flexGrow: 1,
   },
 });
 

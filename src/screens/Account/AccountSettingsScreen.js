@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   Image,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useAuth} from '../../context/AuthContext';
@@ -63,6 +64,7 @@ const AccountSettingsScreen = ({navigation}) => {
 
   return (
     <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
@@ -124,34 +126,10 @@ const AccountSettingsScreen = ({navigation}) => {
               onPress={() => navigation.navigate('EditBusinessDetails')}
             />
             <MenuItem
-              iconName="map-pin"
+              iconName="place"
               title="Manage Addresses"
               subtitle="Change or Edit Addresses"
               onPress={() => navigation.navigate('EditAddresses')}
-            />
-            <MenuItem
-              iconName="dollar-sign"
-              title="Manage Bank Account"
-              subtitle="Change or Edit Bank Accounts"
-              onPress={() => navigation.navigate('ManageBankAccount')}
-            />
-            {/* <MenuItem
-              iconName="globe"
-              title="Language Preference"
-              subtitle="Select a language."
-              onPress={() => navigation.navigate('LanguagePreference')}
-            /> */}
-            <MenuItem
-              iconName="file-text"
-              title="Upload Shop KYC Document"
-              subtitle="Change Business Name"
-              onPress={() => navigation.navigate('ShopKYC')}
-            />
-            <MenuItem
-              iconName="users"
-              title="Manage Team"
-              subtitle="Team Details, Invite & Active Sessions"
-              onPress={() => navigation.navigate('ManageTeam')}
             />
             <MenuItem
               iconName="book"

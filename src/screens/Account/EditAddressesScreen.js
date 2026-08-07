@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
@@ -215,7 +215,7 @@ const EditAddressesScreen = () => {
           <Text style={styles.contactText}>{item.deliveryContact}</Text>
         </View>
         <View style={styles.contactRow}>
-          <Icon name="map-pin" size={14} color="#666" />
+          <Icon name="place" size={14} color="#666" />
           <Text style={styles.contactText}>{item.pincode}</Text>
         </View>
       </View>
@@ -360,7 +360,7 @@ const EditAddressesScreen = () => {
         {/* Addresses List */}
         {addresses.length === 0 ? (
           <View style={styles.emptyStateContainer}>
-            <Icon name="map-pin" size={48} color="#ccc" />
+            <Icon name="place" size={48} color="#ccc" />
             <Text style={styles.emptyStateTitle}>No Addresses Found</Text>
             <Text style={styles.emptyStateText}>
               Add your first shop address to get started

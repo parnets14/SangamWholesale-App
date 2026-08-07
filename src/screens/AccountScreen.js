@@ -1,4 +1,4 @@
-ï»¿import React from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,22 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import {useAuth} from '../context/AuthContext';
 
 const AccountScreen = ({navigation}) => {
+  const {user} = useAuth();
+
+  const fullName = user?.userDetails?.fullName || user?.name || '';
+  const phone = user?.phone || '';
+
+  // Build initials for the avatar (up to 2 chars)
+  const initials = fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0].toUpperCase())
+    .join('');
+
   const handleCallSupport = () => {
     const phoneNumber = 'tel:+1234567890';
     Linking.openURL(phoneNumber);
@@ -33,7 +47,7 @@ const AccountScreen = ({navigation}) => {
 
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/images/Sangam-logo.jpeg')} // replace with actual path
+              source={require('../assets/images/Sangam-logo.jpeg')}
               style={styles.headerImage}
             />
           </View>
@@ -41,27 +55,28 @@ const AccountScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Main Content */}
           <View style={styles.mainContent}>
-            {/* Setup Your Account Card */}
-            <TouchableOpacity
-              style={styles.setupCard}
-              onPress={() => navigation.navigate('SetupAccount')}
-              activeOpacity={0.7}>
-              <View style={styles.setupIconContainer}>
-                <View style={styles.userIcon}>
-                  <Icon name="user" size={20} color="#ffffff" />
+            {/* Name Card — shown above Setup your account */}
+            {(fullName || phone) && (
+              <View style={styles.nameCard}>
+                <View style={styles.avatarContainer}>
+                  {initials ? (
+                    <Text style={styles.avatarText}>{initials}</Text>
+                  ) : (
+                    <Icon name="user" size={24} color="#7B2533" />
+                  )}
                 </View>
-                <View style={styles.checkBadge}>
-                  <Icon name="check" size={12} color="#ffffff" />
+                <View style={styles.nameTextContainer}>
+                  {fullName ? (
+                    <Text style={styles.nameText} numberOfLines={1}>
+                      {fullName}
+                    </Text>
+                  ) : null}
+                  {phone ? (
+                    <Text style={styles.phoneText}>{phone}</Text>
+                  ) : null}
                 </View>
               </View>
-              <View style={styles.setupTextContainer}>
-                <Text style={styles.setupTitle}>Setup your account</Text>
-                <Text style={styles.setupSubtitle}>
-                  to start placing orders
-                </Text>
-              </View>
-              <Icon name="chevron-right" size={24} color="#6B7280" />
-            </TouchableOpacity>
+            )}
 
             {/* Manage Your Business Section */}
             <Text style={styles.sectionTitle}>Manage Your Business</Text>
@@ -95,28 +110,6 @@ const AccountScreen = ({navigation}) => {
 
             <TouchableOpacity
               style={styles.singleMenuItem}
-              onPress={() => navigation.navigate('TargetSchemes')}
-              activeOpacity={0.7}>
-              <View style={styles.menuIconContainer}>
-                <Icon name="target" size={20} color="#374151" />
-              </View>
-              <Text style={styles.menuText}>Target Schemes</Text>
-              <Icon name="chevron-right" size={20} color="#6B7280" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.singleMenuItem}
-              onPress={() => navigation.navigate('ExpirySupport')}
-              activeOpacity={0.7}>
-              <View style={styles.menuIconContainer}>
-                <Icon name="alert-triangle" size={20} color="#374151" />
-              </View>
-              <Text style={styles.menuText}>Expiry Support</Text>
-              <Icon name="chevron-right" size={20} color="#6B7280" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.singleMenuItem}
               onPress={() => navigation.navigate('AccountSettings')}
               activeOpacity={0.7}>
               <View style={styles.menuIconContainer}>
@@ -146,7 +139,7 @@ const AccountScreen = ({navigation}) => {
               </View>
               <View style={styles.availabilityContainer}>
                 <Text style={styles.availabilityText}>
-                  Available 9 am to 6 pm â€¢ Monday to Saturday
+                  Available 9 am to 6 pm • Monday to Saturday
                 </Text>
               </View>
             </View>
@@ -192,6 +185,51 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  nameCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FEF2F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+    borderWidth: 2,
+    borderColor: '#7B2533',
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#7B2533',
+    letterSpacing: 1,
+  },
+  nameTextContainer: {
+    flex: 1,
+  },
+  nameText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 3,
+  },
+  phoneText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '400',
+  },
   logoContainer: {
     width: 52,
     height: 52,
@@ -214,61 +252,6 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     paddingHorizontal: 10,
-  },
-  setupCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  setupIconContainer: {
-    position: 'relative',
-    marginRight: 16,
-  },
-  userIcon: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#7B2533',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkBadge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    width: 20,
-    height: 20,
-    backgroundColor: '#10B981',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  setupTextContainer: {
-    flex: 1,
-  },
-  setupTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  setupSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
   },
   sectionTitle: {
     fontSize: 18,

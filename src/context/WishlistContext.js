@@ -1,4 +1,4 @@
-﻿import React, {createContext, useContext, useState, useEffect, useCallback} from 'react';
+import React, {createContext, useContext, useState, useEffect, useCallback} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ENDPOINTS} from '../config/api';
 
@@ -9,7 +9,7 @@ export const WishlistProvider = ({children, token}) => {
   const [wishlist, setWishlist] = useState(new Set());
   const [loading, setLoading] = useState(false);
 
-  // Load wishlist — from API if logged in, else from AsyncStorage
+  // Load wishlist � from API if logged in, else from AsyncStorage
   const loadWishlist = useCallback(async () => {
     if (token) {
       try {

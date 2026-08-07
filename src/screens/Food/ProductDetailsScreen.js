@@ -45,7 +45,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const handleWishlist = () => {
     toggleWishlist(product._id);
     Alert.alert(
-      !wishlisted ? '❤️ Added to Wishlist' : '💔 Removed from Wishlist',
+      !wishlisted ? '?? Added to Wishlist' : '?? Removed from Wishlist',
       `${product.name} has been ${
         !wishlisted ? 'added to' : 'removed from'
       } your wishlist.`,
@@ -55,7 +55,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `🌾 Check out this premium rice: ${product.name}\n💰 Only ₹${product.price}/${product.unit}\n\nOrder now on Udaan!`,
+        message: `?? Check out this premium rice: ${product.name}\n?? Only ?${product.price}/${product.unit}\n\nOrder now on Udaan!`,
         url: `https://udaan.com/product/${product._id}`,
         title: product.name,
       });
@@ -78,9 +78,8 @@ const ProductDetailsScreen = ({navigation, route}) => {
   return (
     <SafeAreaView
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={theme.statusBarBackground}
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content"
+        backgroundColor="#7B2533"
       />
 
       {/* Enhanced Header */}
@@ -190,7 +189,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
             <View style={styles.priceRow}>
               <Text style={styles.currentPrice}>₹{product.price}</Text>
               <Text style={styles.unitText}>
-                {product.quantity} {product.unit}
+                {[product.quantity, product.unit].filter(Boolean).join(' ')}
               </Text>
               {hasDiscount && (
                 <Text style={styles.originalPrice}>₹{originalPrice}</Text>
@@ -198,8 +197,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
             </View>
             {hasDiscount && (
               <Text style={styles.savingsText}>
-                You save ₹{product.discountPrice} {product.quantity}{' '}
-                {product.unit}
+                {`You save ?${product.discountPrice} ${product.quantity} ${product.unit}`}
               </Text>
             )}
           </View>
@@ -230,7 +228,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
                   {quantity}
                 </Text>
                 <Text style={[styles.quantityUnit, {color: theme.textColor}]}>
-                  {product.unit}
+                  {product.unit || ''}
                 </Text>
               </View>
               <TouchableOpacity
@@ -312,7 +310,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
                 Unit
               </Text>
               <Text style={[styles.specValue, {color: theme.textColor}]}>
-                {product.quantity} {product.unit}
+                {[product.quantity, product.unit].filter(Boolean).join(' ')}
               </Text>
             </View>
             <View style={styles.specItem}>

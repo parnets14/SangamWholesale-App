@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -10,6 +10,7 @@ import {
   Image,
   Linking,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
@@ -97,6 +98,7 @@ const SetupAccountScreen = ({}) => {
 
   return (
     <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <SafeAreaView style={styles.container}>
         {/* Header with Red Background */}
         <View style={styles.headerContainer}>
@@ -281,7 +283,7 @@ const SetupAccountScreen = ({}) => {
                   Address Creation
                 </Text>
                 <View style={styles.cardIcon}>
-                  <Icon name="map-pin" size={20} color="#9CA3AF" />
+                  <Icon name="place" size={20} color="#9CA3AF" />
                 </View>
               </View>
             </View>

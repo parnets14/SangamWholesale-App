@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 
 const UserDetailsScreen = ({navigation, route}) => {
@@ -33,7 +34,7 @@ const UserDetailsScreen = ({navigation, route}) => {
       );
       const data = await response.json();
       if (response.ok && data.success) {
-        // Do NOT call login() yet — BusinessDetails still needed on auth stack
+        // Do NOT call login() yet � BusinessDetails still needed on auth stack
         // Pass token and updated user forward
         const updatedUser = {
           ...user,
@@ -59,6 +60,7 @@ const UserDetailsScreen = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"

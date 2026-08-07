@@ -1,5 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -15,9 +14,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '../../context/ThemeContext';
 import {useCart} from '../../context/CartContext';
 import {useAuth} from '../../context/AuthContext';
+import {useFocusEffect} from '@react-navigation/native';
 
 const CheckoutScreen = ({navigation, route}) => {
   const {theme} = useTheme();
@@ -33,14 +34,16 @@ const CheckoutScreen = ({navigation, route}) => {
   const [orderNotes, setOrderNotes] = useState('');
   const [showCoupons, setShowCoupons] = useState(false);
 
-  // Fetch addresses on component mount
-  useEffect(() => {
-    if (token) {
-      fetchAddresses();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+  // Fetch addresses on focus (re-fetches when returning from address screen)
+  useFocusEffect(
+    useCallback(() => {
+      if (token) {
+        fetchAddresses();
+      } else {
+        setLoading(false);
+      }
+    }, [token]),
+  );
 
   const fetchAddresses = async () => {
     try {
@@ -248,7 +251,7 @@ const CheckoutScreen = ({navigation, route}) => {
       return (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="map-pin" size={18} color="#7B2533" />
+            <MIcon name="place" size={18} color="#7B2533" />
             <Text style={styles.sectionTitle}>Delivery Address</Text>
           </View>
           <View style={styles.loginPrompt}>
@@ -268,7 +271,7 @@ const CheckoutScreen = ({navigation, route}) => {
       return (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="map-pin" size={18} color="#7B2533" />
+            <MIcon name="place" size={18} color="#7B2533" />
             <Text style={styles.sectionTitle}>Delivery Address</Text>
           </View>
           <View style={styles.loadingContainer}>
@@ -283,11 +286,11 @@ const CheckoutScreen = ({navigation, route}) => {
       return (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="map-pin" size={18} color="#7B2533" />
+            <MIcon name="place" size={18} color="#7B2533" />
             <Text style={styles.sectionTitle}>Delivery Address</Text>
           </View>
           <View style={styles.noAddressContainer}>
-            <Icon name="map-pin" size={24} color="#6B7280" />
+            <MIcon name="place" size={24} color="#6B7280" />
             <Text style={styles.noAddressText}>No delivery address found</Text>
             <TouchableOpacity
               style={styles.addAddressButton}
@@ -302,15 +305,10 @@ const CheckoutScreen = ({navigation, route}) => {
     return (
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Icon name="map-pin" size={18} color="#7B2533" />
+          <MIcon name="place" size={18} color="#7B2533" />
           <Text style={styles.sectionTitle}>Delivery Address</Text>
           <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('EditAddresses', {
-                addresses,
-                onSelectAddress: setSelectedAddress,
-              })
-            }>
+            onPress={() => navigation.navigate('EditAddresses')}>
             <Text style={styles.changeText}>Change</Text>
           </TouchableOpacity>
         </View>

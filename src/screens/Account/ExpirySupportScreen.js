@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,7 @@ const ExpirySupportScreen = () => {
   return (
     <>
       <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
         <View style={styles.headerContainer}>
           <TouchableOpacity
             style={styles.backButton}

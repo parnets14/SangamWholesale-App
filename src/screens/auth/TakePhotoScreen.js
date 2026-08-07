@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   PermissionsAndroid,
   Platform,
   Alert,
+  StatusBar,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -103,6 +104,7 @@ const TakePhotoScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <Text style={styles.header}>

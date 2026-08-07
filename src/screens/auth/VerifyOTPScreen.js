@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  StatusBar,
 } from 'react-native';
 import {
   CodeField,
@@ -92,14 +93,14 @@ const VerifyOTPScreen = ({navigation, route}) => {
         const businessCompleted = user?.businessDetails?.isCompleted;
 
         if (!profileCompleted) {
-          // New user — do NOT call login() yet, navigator must stay on auth stack
+          // New user � do NOT call login() yet, navigator must stay on auth stack
           // Pass token/user via route params for later use
           navigation.replace('UserDetails', {phoneNumber, token, user});
         } else if (!businessCompleted) {
-          // Profile done but no business yet — still on auth stack
+          // Profile done but no business yet � still on auth stack
           navigation.replace('BusinessDetails', {phoneNumber, token, user});
         } else {
-          // Fully registered — now call login() to switch to home stack
+          // Fully registered � now call login() to switch to home stack
           login(token, user);
           navigation.replace('Splash');
         }
@@ -151,6 +152,7 @@ const VerifyOTPScreen = ({navigation, route}) => {
 
   return (
     <>
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
