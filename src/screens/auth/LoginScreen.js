@@ -139,7 +139,7 @@ const LoginScreen = ({navigation}) => {
             <View style={styles.inputContainer}>
               <View style={styles.phoneInput}>
                 <View style={styles.countryCodeContainer}>
-                  <Text style={styles.countryCode}>????</Text>
+                  <Text style={styles.countryCode}>🇮🇳</Text>
                   <Text style={styles.countryCodeText}>+91</Text>
                 </View>
                 <View style={styles.divider} />

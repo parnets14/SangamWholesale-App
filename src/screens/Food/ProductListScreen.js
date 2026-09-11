@@ -27,28 +27,30 @@ const ProductListScreen = ({navigation, route}) => {
   const [error, setError] = useState(null);
   const {toggleWishlist, isWishlisted} = useWishlist();
 
+  const fetchProducts = async (subCat) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        'https://sangamwholesale.com/api/products/',
+      );
+      const data = await response.json();
+      const productList = data.products || [];
+      const filtered = productList.filter(
+        prod =>
+          prod.subcategory &&
+          prod.subcategory._id === subCat._id,
+      );
+      setProducts(filtered);
+    } catch (err) {
+      setError('Failed to load products. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          'https://sangamwholesale.com/api/products/',
-        );
-        const data = await response.json();
-        const filtered = data.products.filter(
-          prod =>
-            prod.subcategory &&
-            prod.subcategory._id === selectedSubCategory._id,
-        );
-        setProducts(filtered);
-      } catch (err) {
-        setError('Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    fetchProducts(selectedSubCategory);
   }, [selectedSubCategory]);
 
   const renderSubCategory = ({item}) => (
@@ -203,7 +205,7 @@ const ProductListScreen = ({navigation, route}) => {
                   styles.retryButton,
                   {backgroundColor: theme.primaryColor},
                 ]}
-                onPress={() => setLoading(true)}>
+                onPress={() => fetchProducts(selectedSubCategory)}>
                 <Text style={styles.retryButtonText}>Try Again</Text>
               </TouchableOpacity>
             </View>

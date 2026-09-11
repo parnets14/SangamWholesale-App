@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect, useCallback} from 'react';
+﻿import React, {useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -19,20 +19,24 @@ import {useTheme} from '../../context/ThemeContext';
 import {useCart} from '../../context/CartContext';
 import {useAuth} from '../../context/AuthContext';
 import {useFocusEffect} from '@react-navigation/native';
+import useRazorpay from '../../hooks/useRazorpay';
+import {ENDPOINTS} from '../../config/api';
 
 const CheckoutScreen = ({navigation, route}) => {
   const {theme} = useTheme();
   const {clearCart} = useCart();
   const {user, token} = useAuth();
   const {items, total} = route.params;
+  const {openRazorpay} = useRazorpay();
 
   // State management
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('upi');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [orderNotes, setOrderNotes] = useState('');
   const [showCoupons, setShowCoupons] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
 
   // Fetch addresses on focus (re-fetches when returning from address screen)
   useFocusEffect(
@@ -111,6 +115,38 @@ const CheckoutScreen = ({navigation, route}) => {
       return;
     }
 
+    const grandTotal = parseFloat((total * 1.18).toFixed(2));
+
+    if (paymentMethod === 'razorpay') {
+      // ── Online payment: open Razorpay, then place order after verification ──
+      setPlacingOrder(true);
+      openRazorpay({
+        amount: grandTotal,
+        user,
+        token,
+        onSuccess: async paymentResult => {
+          await submitOrder({
+            paymentMethod: 'razorpay',
+            paymentStatus: 'paid',
+            razorpayPaymentId: paymentResult.razorpay_payment_id,
+            razorpayOrderId: paymentResult.razorpay_order_id,
+            razorpaySignature: paymentResult.razorpay_signature,
+          });
+          setPlacingOrder(false);
+        },
+        onFailure: _err => {
+          setPlacingOrder(false);
+        },
+      });
+    } else {
+      // ── Cash on Delivery ─────────────────────────────────────────────────
+      setPlacingOrder(true);
+      await submitOrder({paymentMethod: 'cod', paymentStatus: 'pending'});
+      setPlacingOrder(false);
+    }
+  };
+
+  const submitOrder = async extraPaymentFields => {
     try {
       const orderPayload = {
         items: items.map(item => ({
@@ -123,30 +159,26 @@ const CheckoutScreen = ({navigation, route}) => {
         deliveryAddress: formatAddress(selectedAddress),
         addressName: selectedAddress.shopName,
         addressContact: selectedAddress.deliveryContact || '6383626844',
-        paymentMethod,
         orderNotes,
         subtotal: total,
-        gst: total * 0.18,
-        total: total * 1.18,
+        gst: parseFloat((total * 0.18).toFixed(2)),
+        total: parseFloat((total * 1.18).toFixed(2)),
         orderId: `UD${Math.floor(Math.random() * 1000000)}`,
+        ...extraPaymentFields,
       };
-      console.log('Order Payload:', orderPayload);
-      const response = await fetch(
-        'https://sangamwholesale.com/api/orders/',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(orderPayload),
+
+      const response = await fetch(ENDPOINTS.ORDERS, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify(orderPayload),
+      });
 
       const data = await response.json();
       if (response.ok) {
         clearCart();
-
         ToastAndroid.showWithGravity(
           'Order placed successfully',
           ToastAndroid.LONG,
@@ -344,16 +376,30 @@ const CheckoutScreen = ({navigation, route}) => {
       );
     }
 
+    const isDisabled = !selectedAddress || addresses.length === 0 || placingOrder;
+    const buttonLabel =
+      placingOrder
+        ? 'Processing…'
+        : paymentMethod === 'razorpay'
+        ? 'Pay Now'
+        : 'Place Order';
+
     return (
       <TouchableOpacity
-        style={[
-          styles.checkoutButton,
-          (!selectedAddress || addresses.length === 0) && styles.disabledButton,
-        ]}
+        style={[styles.checkoutButton, isDisabled && styles.disabledButton]}
         onPress={handlePlaceOrder}
-        disabled={!selectedAddress || addresses.length === 0}>
-        <Text style={styles.checkoutButtonText}>Place Order</Text>
-        <Icon name="arrow-right" size={18} color="#fff" />
+        disabled={isDisabled}>
+        {placingOrder ? (
+          <ActivityIndicator size="small" color="#fff" style={{marginRight: 8}} />
+        ) : (
+          <Icon
+            name={paymentMethod === 'razorpay' ? 'zap' : 'check-circle'}
+            size={18}
+            color="#fff"
+            style={{marginRight: 8}}
+          />
+        )}
+        <Text style={styles.checkoutButtonText}>{buttonLabel}</Text>
       </TouchableOpacity>
     );
   };
@@ -438,12 +484,12 @@ const CheckoutScreen = ({navigation, route}) => {
             </View>
 
             <PaymentOption
-              method="upi"
-              icon="smartphone"
-              title="UPI Payment"
-              subtitle="Pay instantly via UPI"
-              isSelected={paymentMethod === 'upi'}
-              onPress={() => setPaymentMethod('upi')}
+              method="razorpay"
+              icon="zap"
+              title="Pay Online"
+              subtitle="UPI, Cards, Net Banking & Wallets"
+              isSelected={paymentMethod === 'razorpay'}
+              onPress={() => setPaymentMethod('razorpay')}
             />
             <PaymentOption
               method="cod"
@@ -509,7 +555,9 @@ const CheckoutScreen = ({navigation, route}) => {
           <Text style={styles.footerTotal}>
             ₹{(total * 1.18).toLocaleString()}
           </Text>
-          <Text style={styles.footerText}>Total Payable</Text>
+          <Text style={styles.footerText}>
+            {paymentMethod === 'razorpay' ? 'Pay via Razorpay' : 'Cash on Delivery'}
+          </Text>
         </View>
         {renderActionButton()}
       </View>

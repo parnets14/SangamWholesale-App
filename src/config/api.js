@@ -3,6 +3,9 @@
 
 export const BASE_URL = 'https://sangamwholesale.com/api';
 
+// Razorpay
+export const RAZORPAY_KEY_ID = 'rzp_live_TadrWdNN9MTuis';
+
 export const ENDPOINTS = {
   // Auth
   SEND_OTP: `${BASE_URL}/user/send-otp`,
@@ -35,6 +38,10 @@ export const ENDPOINTS = {
 
   // Returns
   RETURN_ORDERS: `${BASE_URL}/return-orders`,
+
+  // Payments
+  PAYMENTS_CREATE_ORDER: `${BASE_URL}/payments/create-order`,
+  PAYMENTS_VERIFY: `${BASE_URL}/payments/verify-payment`,
 
   // Bank Accounts
   BANK_ACCOUNTS: `${BASE_URL}/bank-accounts`,

@@ -45,7 +45,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const handleWishlist = () => {
     toggleWishlist(product._id);
     Alert.alert(
-      !wishlisted ? '?? Added to Wishlist' : '?? Removed from Wishlist',
+      !wishlisted ? 'Added to Wishlist' : 'Removed from Wishlist',
       `${product.name} has been ${
         !wishlisted ? 'added to' : 'removed from'
       } your wishlist.`,
@@ -55,7 +55,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `?? Check out this premium rice: ${product.name}\n?? Only ?${product.price}/${product.unit}\n\nOrder now on Udaan!`,
+        message: `Check out this product: ${product.name}\nOnly ₹${product.price}/${product.unit}\n\nOrder now on Udaan!`,
         url: `https://udaan.com/product/${product._id}`,
         title: product.name,
       });
@@ -78,9 +78,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   return (
     <SafeAreaView
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
-      <StatusBar backgroundColor="#7B2533" barStyle="light-content"
-        backgroundColor="#7B2533"
-      />
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
       {/* Enhanced Header */}
       <View style={[styles.header, {backgroundColor: '#7B2533'}]}>
@@ -197,7 +195,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
             </View>
             {hasDiscount && (
               <Text style={styles.savingsText}>
-                {`You save ?${product.discountPrice} ${product.quantity} ${product.unit}`}
+                {`You save ₹${product.discountPrice} (${product.quantity} ${product.unit})`}
               </Text>
             )}
           </View>
@@ -262,7 +260,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
           </View>
           <View style={styles.highlightGrid}>
             <View style={styles.highlightItem}>
-              <Icon name="shield-check" size={20} color="#4ECDC4" />
+              <Icon name="shield" size={20} color="#4ECDC4" />
               <Text style={[styles.highlightText, {color: theme.textColor}]}>
                 Premium Quality
               </Text>
