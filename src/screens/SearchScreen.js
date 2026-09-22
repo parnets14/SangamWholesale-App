@@ -4,7 +4,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   FlatList,
@@ -13,6 +12,7 @@ import {
   Share,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 
 const SearchScreen = ({navigation}) => {
@@ -101,7 +101,7 @@ const SearchScreen = ({navigation}) => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <View style={styles.header}>
         <TouchableOpacity

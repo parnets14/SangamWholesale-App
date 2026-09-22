@@ -1,11 +1,10 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Image,
   Alert,
@@ -13,6 +12,7 @@ import {
   ToastAndroid,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
 
@@ -219,7 +219,7 @@ const SelectCategoryScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Select Category</Text>

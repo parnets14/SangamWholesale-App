@@ -1,11 +1,10 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+ï»¿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TextInput,
   ToastAndroid,
@@ -16,6 +15,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 
 import {useNavigation} from '@react-navigation/native';
@@ -385,7 +385,7 @@ const EditUserDetailsScreen = () => {
           {device.name} {device.isCurrent && '(This device)'}
         </Text>
         <Text style={styles.deviceDetails}>
-          {device.brand} {device.model} • {device.os}
+          {device.brand} {device.model} ï¿½ {device.os}
         </Text>
         <Text style={styles.deviceLastActive}>
           Last active: {new Date(device.lastActive).toLocaleString()}
@@ -453,7 +453,7 @@ const EditUserDetailsScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

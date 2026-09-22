@@ -1,4 +1,4 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+ï»¿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
-  SafeAreaView,
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import axios from 'axios';
@@ -99,7 +99,7 @@ const CategoryScreen = ({navigation, route}) => {
 
   if (loading) {
     return (
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <ActivityIndicator size="large" color={theme.primaryColor} />
         <Text style={{color: theme.textColor, marginTop: 16}}>
@@ -111,7 +111,7 @@ const CategoryScreen = ({navigation, route}) => {
 
   if (error) {
     return (
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <Text style={{color: theme.textColor}}>{error}</Text>
         <TouchableOpacity
@@ -127,7 +127,7 @@ const CategoryScreen = ({navigation, route}) => {
 
   return (
     <>
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
@@ -176,7 +176,7 @@ const CategoryScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          {/* Single FlatList — no ScrollView wrapper to avoid nesting warning */}
+          {/* Single FlatList ï¿½ no ScrollView wrapper to avoid nesting warning */}
           <FlatList
             data={subCategories.filter(sub =>
               sub.name.toLowerCase().includes(searchQuery.toLowerCase()),

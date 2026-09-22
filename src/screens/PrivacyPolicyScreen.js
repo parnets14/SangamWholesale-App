@@ -1,8 +1,9 @@
-// src/screens/PrivacyPolicyScreen.js
+﻿// src/screens/PrivacyPolicyScreen.js
 import React, {useState} from 'react';
 import {View, ScrollView, StyleSheet, Linking, Platform, StatusBar} from 'react-native';
 import {Button, Text, Checkbox, useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const PrivacyPolicyScreen = ({navigation, route}) => {
   const {colors} = useTheme();
@@ -64,9 +65,8 @@ const PrivacyPolicyScreen = ({navigation, route}) => {
   ];
 
   return (
-    <>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
@@ -145,8 +145,7 @@ const PrivacyPolicyScreen = ({navigation, route}) => {
           </Button>
         </View>
       )}
-    </View>
-    </>
+    </SafeAreaView>
   );
 };
 

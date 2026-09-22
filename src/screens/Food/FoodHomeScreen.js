@@ -1,4 +1,4 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+ï»¿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -10,10 +10,10 @@ import {
   FlatList,
   Dimensions,
   TextInput,
-  SafeAreaView,
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Swiper from 'react-native-swiper';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -47,7 +47,7 @@ const FoodHomeScreen = ({navigation}) => {
         'https://sangamwholesale.com/api/banners/',
       );
       console.log('Banners response:', response.data);
-      // Backend stores images as array per banner — flatten all images into one list
+      // Backend stores images as array per banner ï¿½ flatten all images into one list
       const allBanners = response.data.banners || [];
       const flatImages = [];
       allBanners.forEach(banner => {
@@ -194,7 +194,7 @@ const FoodHomeScreen = ({navigation}) => {
   // Show loading only when both categories and main loading are true
   if (loading && categoriesLoading) {
     return (
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[
           styles.loaderContainer,
           {backgroundColor: theme.backgroundColor},
@@ -209,7 +209,7 @@ const FoodHomeScreen = ({navigation}) => {
 
   if (error && categories.length === 0) {
     return (
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[
           styles.errorContainer,
           {backgroundColor: theme.backgroundColor},
@@ -238,7 +238,7 @@ const FoodHomeScreen = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
@@ -283,7 +283,9 @@ const FoodHomeScreen = ({navigation}) => {
                 <Icon name="shopping-cart" size={20} color="#fff" />
                 {getItemCount() > 0 && (
                   <View style={styles.cartBadge}>
-                    <Text style={styles.badgeText}>{getItemCount()}</Text>
+                    <Text style={styles.badgeText}>
+                      {getItemCount() > 99 ? '99+' : getItemCount()}
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>

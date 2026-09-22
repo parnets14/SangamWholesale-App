@@ -1,4 +1,4 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useRef, useState} from 'react';
 import {
   View,
@@ -6,12 +6,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Alert,
   Image,
   Linking,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -292,7 +292,7 @@ const ShopKYCScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Header */}
       <View style={styles.header}>

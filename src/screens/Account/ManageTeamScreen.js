@@ -1,13 +1,13 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 
@@ -32,7 +32,7 @@ const ManageTeamScreen = () => {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
         {/* Header */}
         <View style={styles.headerContainer}>

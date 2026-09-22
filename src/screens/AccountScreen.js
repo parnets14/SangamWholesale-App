@@ -1,15 +1,15 @@
-import React from 'react';
+ï»¿import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   Linking,
   Image,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useAuth} from '../context/AuthContext';
 
@@ -35,7 +35,7 @@ const AccountScreen = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header with Red Background */}
         <View style={styles.headerContainer}>
           <View style={styles.headerContent}>
@@ -55,7 +55,7 @@ const AccountScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Main Content */}
           <View style={styles.mainContent}>
-            {/* Name Card — shown above Setup your account */}
+            {/* Name Card ï¿½ shown above Setup your account */}
             {(fullName || phone) && (
               <View style={styles.nameCard}>
                 <View style={styles.avatarContainer}>
@@ -139,7 +139,7 @@ const AccountScreen = ({navigation}) => {
               </View>
               <View style={styles.availabilityContainer}>
                 <Text style={styles.availabilityText}>
-                  Available 9 am to 6 pm • Monday to Saturday
+                  Available 9 am to 6 pm ï¿½ Monday to Saturday
                 </Text>
               </View>
             </View>

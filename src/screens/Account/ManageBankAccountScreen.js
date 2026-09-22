@@ -1,17 +1,17 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Linking,
   Alert,
   TextInput,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -394,7 +394,7 @@ const ManageBankAccountScreen = () => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

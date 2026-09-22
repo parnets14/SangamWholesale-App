@@ -9,13 +9,14 @@ import {
   FlatList,
   Dimensions,
   TextInput,
-  SafeAreaView,
   StatusBar,
   Alert,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useCart} from '../../context/CartContext';
+import CartToast from '../../components/CartToast';
 
 const {width, height} = Dimensions.get('window');
 
@@ -29,6 +30,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
   const [quantity, setQuantity] = useState(1);
   const [showQuantityControls, setShowQuantityControls] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [lastAddedProduct, setLastAddedProduct] = useState(null);
 
   const filters = ['All', 'Popular', 'New', 'Sale', 'Price: Low to High'];
 
@@ -151,14 +154,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
     };
     
     addToCart(cartItem);
-    Alert.alert(
-      'Added to Cart',
-      `${quantity} ${quantity === 1 ? 'unit' : 'units'} of ${selectedProduct.name} added to cart`,
-      [
-        {text: 'Continue Shopping', style: 'cancel'},
-        {text: 'View Cart', onPress: () => navigation.navigate('Cart')},
-      ]
-    );
+    setLastAddedProduct({...selectedProduct, quantity});
+    setToastVisible(true);
     
     setShowQuantityControls(false);
     setSelectedProduct(null);
@@ -279,7 +276,7 @@ const PopularCategoriesScreen = ({navigation, route}) => {
         backgroundColor="#7B2533"
         barStyle="light-content"
       />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -439,6 +436,34 @@ const PopularCategoriesScreen = ({navigation, route}) => {
             </View>
           </View>
         )}
+
+      {/* Bottom Cart Bar */}
+      {getItemCount() > 0 && (
+        <TouchableOpacity
+          style={styles.bottomCartBar}
+          onPress={() => navigation.navigate('Cart')}
+          activeOpacity={0.92}>
+          <View style={styles.cartBarLeft}>
+            <View style={styles.cartItemsBadge}>
+              <Text style={styles.cartItemsCount}>{getItemCount()}</Text>
+            </View>
+            <Text style={styles.cartBarText}>items in cart</Text>
+          </View>
+          <View style={styles.cartBarRight}>
+            <Text style={styles.cartBarAction}>View Cart</Text>
+            <Icon name="chevron-right" size={18} color="#fff" />
+          </View>
+        </TouchableOpacity>
+      )}
+
+      {/* Zepto-style Cart Toast */}
+      <CartToast
+        visible={toastVisible}
+        product={lastAddedProduct}
+        cartCount={getItemCount()}
+        onViewCart={() => navigation.navigate('Cart')}
+        onDismiss={() => setToastVisible(false)}
+      />
       </SafeAreaView>
     </>
   );
@@ -877,6 +902,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginLeft: 8,
+  },
+  // Bottom cart bar
+  bottomCartBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#7B2533',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -3},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  cartBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cartItemsBadge: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    marginRight: 10,
+  },
+  cartItemsCount: {
+    color: '#7B2533',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  cartBarText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.9,
+  },
+  cartBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cartBarAction: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+    marginRight: 4,
   },
 });
 

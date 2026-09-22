@@ -161,6 +161,12 @@ export const CartProvider = ({children, token}) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
+  // Returns how many of a specific product are in the cart (0 if not in cart)
+  const getCartQuantity = productId => {
+    const item = cartItems.find(i => i._id === productId);
+    return item ? item.quantity : 0;
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -172,6 +178,7 @@ export const CartProvider = ({children, token}) => {
         clearCart,
         getTotal,
         getItemCount,
+        getCartQuantity,
         refreshCart: loadCart,
       }}>
       {children}

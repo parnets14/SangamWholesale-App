@@ -6,10 +6,10 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
@@ -97,7 +97,7 @@ const WishlistScreen = ({navigation}) => {
   const cartCount = getItemCount();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar backgroundColor={PRIMARY} barStyle="light-content" />
 
       {/* Header */}

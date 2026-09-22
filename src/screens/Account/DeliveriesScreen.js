@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Linking,
@@ -14,6 +13,7 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext'; // Adjust the import based on your context structure
@@ -364,7 +364,7 @@ const DeliveriesScreen = () => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

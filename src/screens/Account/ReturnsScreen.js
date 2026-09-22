@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   ActivityIndicator,
   StatusBar,
@@ -15,6 +14,7 @@ import {
   Modal,
   Dimensions,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -448,7 +448,7 @@ export default function ReturnsScreen() {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{padding: 4}}>

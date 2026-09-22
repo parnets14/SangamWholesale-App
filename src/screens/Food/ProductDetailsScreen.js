@@ -6,18 +6,19 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
-  ToastAndroid,
   StatusBar,
   Alert,
   Share,
   Dimensions,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
 import {useCart} from '../../context/CartContext';
 import {useAuth} from '../../context/AuthContext';
+import CartToast from '../../components/CartToast';
+import AddToCartStepper from '../../components/AddToCartStepper';
 
 const ProductDetailsScreen = ({navigation, route}) => {
   const {product} = route.params;
@@ -25,22 +26,12 @@ const ProductDetailsScreen = ({navigation, route}) => {
   console.log('Product Details:', product);
   const {theme} = useTheme();
   const {isWishlisted, toggleWishlist} = useWishlist();
-  const {addToCart} = useCart();
+  const {getItemCount, getCartQuantity} = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const wishlisted = isWishlisted(product._id);
-
-  const handleAddToCart = () => {
-    addToCart({...product, quantity});
-    Alert.alert(
-      'Added to Cart',
-      `${product.name} has been added to your cart.`,
-      [
-        {text: 'Continue Shopping', style: 'cancel'},
-        {text: 'Add to Cart', onPress: () => navigation.navigate('FoodTab')},
-      ],
-    );
-  };
+  const cartQty = getCartQuantity(product._id);
 
   const handleWishlist = () => {
     toggleWishlist(product._id);
@@ -76,7 +67,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const totalSavings = hasDiscount ? product.discountPrice * quantity : 0;
 
   return (
-    <SafeAreaView
+    <SafeAreaView edges={['top', 'bottom']}
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
@@ -94,6 +85,13 @@ const ProductDetailsScreen = ({navigation, route}) => {
           onPress={() => navigation.navigate('Cart')}
           style={styles.headerIcon}>
           <Icon name="shopping-cart" size={22} color="#fff" />
+          {getItemCount() > 0 && (
+            <View style={styles.headerCartBadge}>
+              <Text style={styles.headerCartBadgeText}>
+                {getItemCount() > 99 ? '99+' : getItemCount()}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -332,29 +330,42 @@ const ProductDetailsScreen = ({navigation, route}) => {
       </ScrollView>
 
       {/* Enhanced Bottom Action Bar */}
-      <View
-        style={[styles.bottomBar, {backgroundColor: theme.backgroundColor}]}>
+      {/* ── Bottom Action Bar ── */}
+      <View style={[styles.bottomBar, {backgroundColor: theme.backgroundColor}]}>
         <View style={styles.bottomContent}>
+          {/* Price summary */}
           <View style={styles.priceSummary}>
             <Text style={[styles.summaryLabel, {color: theme.textColor}]}>
               Total Amount
             </Text>
             <View style={styles.summaryPriceRow}>
-              <Text style={styles.summaryPrice}>₹{totalPrice}</Text>
+              <Text style={styles.summaryPrice}>
+                ₹{cartQty > 0 ? product.price * cartQty : totalPrice}
+              </Text>
               {totalSavings > 0 && (
                 <Text style={styles.summarySavings}>Save ₹{totalSavings}</Text>
               )}
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.addToCartButton}
-            onPress={handleAddToCart}
-            activeOpacity={0.8}>
-            <Icon name="shopping-cart" size={18} color="#fff" />
-            <Text style={styles.addToCartText}>Add to Cart</Text>
-          </TouchableOpacity>
+
+          {/* ADD / stepper — uses AddToCartStepper */}
+          <AddToCartStepper
+            product={product}
+            size="md"
+            onFirstAdd={() => setToastVisible(true)}
+          />
         </View>
       </View>
+
+      {/* Cart Toast — floats above bottom bar */}
+      <CartToast
+        visible={toastVisible}
+        product={{...product, quantity: cartQty || quantity}}
+        cartCount={getItemCount()}
+        bottomOffset={76}
+        onViewCart={() => navigation.navigate('Cart')}
+        onDismiss={() => setToastVisible(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -380,7 +391,26 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  headerIcon: {marginLeft: 16},
+  headerIcon: {marginLeft: 16, position: 'relative'},
+  headerCartBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -8,
+    backgroundColor: '#22c55e',
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#7B2533',
+  },
+  headerCartBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '900',
+  },
   scrollView: {flex: 1},
 
   // Enhanced Image Container
@@ -685,15 +715,9 @@ const styles = StyleSheet.create({
   addToCartButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7B2533',
     paddingHorizontal: 28,
     paddingVertical: 14,
     borderRadius: 25,
-    elevation: 4,
-    shadowColor: '#7B2533',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
   },
   addToCartText: {
     color: '#fff',

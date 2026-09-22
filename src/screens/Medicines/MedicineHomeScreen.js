@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   FlatList,
   Dimensions,
   TextInput,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 
 import {useTheme} from '../../context/ThemeContext';
@@ -167,7 +167,7 @@ const MedicineHomeScreen = ({navigation}) => {
         backgroundColor="#7B2533"
         barStyle="light-content"
       />
-      <SafeAreaView
+      <SafeAreaView edges={['top', 'bottom']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>

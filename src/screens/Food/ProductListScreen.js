@@ -1,7 +1,6 @@
 ﻿// App.js
 import React, {useEffect, useState} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -12,9 +11,13 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
+import {useCart} from '../../context/CartContext';
+import CartToast from '../../components/CartToast';
+import AddToCartStepper from '../../components/AddToCartStepper';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -26,6 +29,9 @@ const ProductListScreen = ({navigation, route}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const {toggleWishlist, isWishlisted} = useWishlist();
+  const {getItemCount} = useCart();
+  const [toastVisible, setToastVisible] = useState(false);
+  const [lastAddedProduct, setLastAddedProduct] = useState(null);
 
   const fetchProducts = async (subCat) => {
     setLoading(true);
@@ -104,43 +110,49 @@ const ProductListScreen = ({navigation, route}) => {
         ]}
         onPress={() => navigation.navigate('ProductDetails', {product: item})}
         activeOpacity={0.9}>
+
+        {/* wishlist */}
         <TouchableOpacity
           style={styles.wishlistButton}
           onPress={() => toggleWishlist(item._id)}
           activeOpacity={0.7}>
           <Icon
-            name={wishlisted ? 'heart' : 'heart'}
-            size={20}
-            color={wishlisted ? '#FF4757' : '#A4B0BE'}
-            fill={wishlisted ? '#FF4757' : 'none'}
+            name="heart"
+            size={18}
+            color={wishlisted ? '#FF4757' : '#ccc'}
           />
         </TouchableOpacity>
 
+        {/* image */}
         <View style={styles.productImageContainer}>
           <Image
-            source={{
-              uri: `https://sangamwholesale.com/products/${item.image}`,
-            }}
+            source={{uri: `https://sangamwholesale.com/products/${item.image}`}}
             style={styles.productImage}
             defaultSource={require('../../assets/images/Sangam-logo.jpeg')}
           />
         </View>
 
+        {/* info */}
         <View style={styles.productInfo}>
-          <Text
-            style={[styles.productName, {color: theme.textColor}]}
-            numberOfLines={2}>
+          <Text style={[styles.productName, {color: theme.textColor}]} numberOfLines={2}>
             {item.name}
           </Text>
-          <Text
-            style={[styles.productDesc, {color: theme.textColor}]}
-            numberOfLines={2}>
+          <Text style={[styles.productDesc, {color: theme.textColor}]} numberOfLines={1}>
             {item.description}
           </Text>
-          <View style={styles.priceContainer}>
+          <View style={styles.priceRow}>
             <Text style={[styles.productPrice, {color: theme.primaryColor}]}>
               ₹{item.price?.toLocaleString('en-IN') || item.price}
             </Text>
+            {/* Zepto-style inline stepper */}
+            <AddToCartStepper
+              product={item}
+              size="sm"
+              onFirstAdd={() => {
+                setLastAddedProduct(item);
+                setToastVisible(true);
+              }}
+            />
           </View>
         </View>
       </TouchableOpacity>
@@ -148,7 +160,7 @@ const ProductListScreen = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView
+    <SafeAreaView edges={['top', 'bottom']}
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Header */}
@@ -165,6 +177,19 @@ const ProductListScreen = ({navigation, route}) => {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {selectedSubCategory?.name || 'Products'}
         </Text>
+        {/* Cart badge */}
+        <TouchableOpacity
+          style={styles.headerCartBtn}
+          onPress={() => navigation.navigate('Cart')}>
+          <Icon name="shopping-cart" size={22} color="#fff" />
+          {getItemCount() > 0 && (
+            <View style={styles.headerCartBadge}>
+              <Text style={styles.headerCartBadgeText}>
+                {getItemCount() > 99 ? '99+' : getItemCount()}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Main Content */}
@@ -233,6 +258,35 @@ const ProductListScreen = ({navigation, route}) => {
           )}
         </View>
       </View>
+
+      {/* Bottom Cart Bar — shows when cart has items */}
+      {getItemCount() > 0 && (
+        <TouchableOpacity
+          style={styles.bottomCartBar}
+          onPress={() => navigation.navigate('Cart')}
+          activeOpacity={0.92}>
+          <View style={styles.cartBarLeft}>
+            <View style={styles.cartItemsBadge}>
+              <Text style={styles.cartItemsCount}>{getItemCount()}</Text>
+            </View>
+            <Text style={styles.cartBarText}>items in cart</Text>
+          </View>
+          <View style={styles.cartBarRight}>
+            <Text style={styles.cartBarAction}>View Cart</Text>
+            <Icon name="chevron-right" size={18} color="#fff" />
+          </View>
+        </TouchableOpacity>
+      )}
+
+      {/* Zepto-style Cart Toast */}
+      <CartToast
+        visible={toastVisible}
+        product={lastAddedProduct}
+        cartCount={getItemCount()}
+        bottomOffset={getItemCount() > 0 ? 65 : 16}
+        onViewCart={() => navigation.navigate('Cart')}
+        onDismiss={() => setToastVisible(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -261,6 +315,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     flex: 1,
+  },
+  headerCartBtn: {
+    padding: 8,
+    position: 'relative',
+  },
+  headerCartBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: '#22c55e',
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#7B2533',
+  },
+  headerCartBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '900',
   },
   mainContainer: {
     flex: 1,
@@ -361,13 +438,68 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 16,
   },
-  priceContainer: {
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  productPrice: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  // Bottom cart bar
+  bottomCartBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#7B2533',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -3},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  cartBarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  productPrice: {
-    fontSize: 16,
+  cartItemsBadge: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    marginRight: 10,
+  },
+  cartItemsCount: {
+    color: '#7B2533',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  cartBarText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.9,
+  },
+  cartBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cartBarAction: {
+    color: '#fff',
+    fontSize: 15,
     fontWeight: '700',
+    marginRight: 4,
   },
 
   // Center Content Styles

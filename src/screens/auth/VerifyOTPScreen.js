@@ -1,4 +1,4 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -11,6 +11,7 @@ import {
   Image,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {
   CodeField,
   Cursor,
@@ -151,10 +152,10 @@ const VerifyOTPScreen = ({navigation, route}) => {
   };
 
   return (
-    <>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       <KeyboardAvoidingView
-        style={styles.container}
+        style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
         <View style={styles.content}>
@@ -228,7 +229,7 @@ const VerifyOTPScreen = ({navigation, route}) => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -236,6 +237,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  keyboardView: {
+    flex: 1,
   },
   content: {
     flex: 1,

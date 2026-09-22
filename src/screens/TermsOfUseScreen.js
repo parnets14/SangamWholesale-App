@@ -1,7 +1,8 @@
-// src/screens/TermsOfUseScreen.js
+﻿// src/screens/TermsOfUseScreen.js
 import React from 'react';
 import {View, ScrollView, StyleSheet, Linking, StatusBar} from 'react-native';
 import {Button, Text} from 'react-native-paper';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const TermsOfUseScreen = ({navigation}) => {
   const handleAccept = () => {
@@ -14,9 +15,9 @@ const TermsOfUseScreen = ({navigation}) => {
   };
 
   return (
-    <>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <View style={styles.container}>
+      <View style={styles.inner}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Terms of Use</Text>
         <Text style={styles.effectiveDate}>Effective: January 1, 2023</Text>
@@ -62,7 +63,7 @@ const TermsOfUseScreen = ({navigation}) => {
         </Button>
       </View>
     </View>
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -70,6 +71,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  inner: {
+    flex: 1,
   },
   content: {
     padding: 20,

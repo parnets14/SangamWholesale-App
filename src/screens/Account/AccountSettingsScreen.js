@@ -1,10 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   ToastAndroid,
   Platform,
@@ -12,6 +11,7 @@ import {
   Image,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useAuth} from '../../context/AuthContext';
 import {IMAGE_BASE} from '../../config/api';
@@ -65,7 +65,7 @@ const AccountSettingsScreen = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

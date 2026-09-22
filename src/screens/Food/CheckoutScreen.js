@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   Alert,
   TextInput,
@@ -13,6 +12,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '../../context/ThemeContext';
@@ -22,12 +22,22 @@ import {useFocusEffect} from '@react-navigation/native';
 import useRazorpay from '../../hooks/useRazorpay';
 import {ENDPOINTS} from '../../config/api';
 
+// Coupon definitions. Validation is done client-side for now; the applied
+// code + discount are also sent to the backend so it can re-verify later.
+// type: 'percent' -> value is a percentage; 'flat' -> value is a rupee amount.
+const AVAILABLE_COUPONS = [
+  {code: 'SANGAM10', type: 'percent', value: 10, minOrder: 500, maxDiscount: 300},
+  {code: 'FLAT100', type: 'flat', value: 100, minOrder: 1000},
+  {code: 'WELCOME50', type: 'flat', value: 50, minOrder: 0},
+];
+
 const CheckoutScreen = ({navigation, route}) => {
   const {theme} = useTheme();
   const {clearCart} = useCart();
   const {user, token} = useAuth();
   const {items, total} = route.params;
   const {openRazorpay} = useRazorpay();
+  const insets = useSafeAreaInsets();
 
   // State management
   const [addresses, setAddresses] = useState([]);
@@ -37,6 +47,68 @@ const CheckoutScreen = ({navigation, route}) => {
   const [orderNotes, setOrderNotes] = useState('');
   const [showCoupons, setShowCoupons] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+
+  // ── Price calculation (single source of truth) ──────────────────────────
+  const discount = (() => {
+    if (!appliedCoupon) return 0;
+    let d =
+      appliedCoupon.type === 'percent'
+        ? (total * appliedCoupon.value) / 100
+        : appliedCoupon.value;
+    if (appliedCoupon.maxDiscount) {
+      d = Math.min(d, appliedCoupon.maxDiscount);
+    }
+    // Never discount more than the subtotal
+    d = Math.min(d, total);
+    return parseFloat(d.toFixed(2));
+  })();
+
+  const taxableAmount = Math.max(0, total - discount);
+  const gstAmount = parseFloat((taxableAmount * 0.18).toFixed(2));
+  const grandTotal = parseFloat((taxableAmount + gstAmount).toFixed(2));
+
+  const applyCoupon = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    const found = AVAILABLE_COUPONS.find(c => c.code === code);
+    if (!found) {
+      setCouponError('Invalid coupon code');
+      setAppliedCoupon(null);
+      return;
+    }
+
+    if (total < found.minOrder) {
+      setCouponError(
+        `Minimum order of ₹${found.minOrder.toLocaleString()} required for this coupon`,
+      );
+      setAppliedCoupon(null);
+      return;
+    }
+
+    setAppliedCoupon(found);
+    setCouponError('');
+    setCouponCode(code);
+    ToastAndroid.showWithGravity(
+      `Coupon ${code} applied`,
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER,
+    );
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
 
   // Fetch addresses on focus (re-fetches when returning from address screen)
   useFocusEffect(
@@ -115,8 +187,6 @@ const CheckoutScreen = ({navigation, route}) => {
       return;
     }
 
-    const grandTotal = parseFloat((total * 1.18).toFixed(2));
-
     if (paymentMethod === 'razorpay') {
       // ── Online payment: open Razorpay, then place order after verification ──
       setPlacingOrder(true);
@@ -161,8 +231,10 @@ const CheckoutScreen = ({navigation, route}) => {
         addressContact: selectedAddress.deliveryContact || '6383626844',
         orderNotes,
         subtotal: total,
-        gst: parseFloat((total * 0.18).toFixed(2)),
-        total: parseFloat((total * 1.18).toFixed(2)),
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        discount,
+        gst: gstAmount,
+        total: grandTotal,
         orderId: `UD${Math.floor(Math.random() * 1000000)}`,
         ...extraPaymentFields,
       };
@@ -405,7 +477,7 @@ const CheckoutScreen = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: '#F5F7FA'}]}>
+    <SafeAreaView edges={['top']} style={[styles.container, {backgroundColor: '#F5F7FA'}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
       {/* Header */}
@@ -449,7 +521,7 @@ const CheckoutScreen = ({navigation, route}) => {
           </View>
 
           {/* Coupon Section */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.couponSection}
             onPress={() => setShowCoupons(!showCoupons)}>
             <Icon name="tag" size={16} color="#7B2533" />
@@ -459,18 +531,43 @@ const CheckoutScreen = ({navigation, route}) => {
               size={16}
               color="#6C757D"
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {showCoupons && (
-            <View style={styles.couponDropdown}>
-              <TextInput
-                style={styles.couponInput}
-                placeholder="Enter coupon code"
-                placeholderTextColor="#9CA3AF"
-              />
-              <TouchableOpacity style={styles.applyButton}>
-                <Text style={styles.applyButtonText}>Apply</Text>
-              </TouchableOpacity>
+            <View>
+              {appliedCoupon ? (
+                <View style={styles.appliedCouponRow}>
+                  <Icon name="check-circle" size={16} color="#10B981" />
+                  <Text style={styles.appliedCouponText}>
+                    {appliedCoupon.code} applied
+                  </Text>
+                  <TouchableOpacity onPress={removeCoupon}>
+                    <Text style={styles.removeCouponText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.couponDropdown}>
+                  <TextInput
+                    style={styles.couponInput}
+                    placeholder="Enter coupon code"
+                    placeholderTextColor="#9CA3AF"
+                    value={couponCode}
+                    onChangeText={text => {
+                      setCouponCode(text);
+                      if (couponError) setCouponError('');
+                    }}
+                    autoCapitalize="characters"
+                  />
+                  <TouchableOpacity
+                    style={styles.applyButton}
+                    onPress={applyCoupon}>
+                    <Text style={styles.applyButtonText}>Apply</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {couponError ? (
+                <Text style={styles.couponError}>{couponError}</Text>
+              ) : null}
             </View>
           )}
         </View>
@@ -529,6 +626,16 @@ const CheckoutScreen = ({navigation, route}) => {
             </Text>
             <Text style={styles.priceValue}>₹{total.toLocaleString()}</Text>
           </View>
+          {discount > 0 && (
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>
+                Discount ({appliedCoupon.code})
+              </Text>
+              <Text style={[styles.priceValue, {color: '#10B981'}]}>
+                -₹{discount.toLocaleString()}
+              </Text>
+            </View>
+          )}
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Delivery Charges</Text>
             <Text style={[styles.priceValue, {color: '#10B981'}]}>FREE</Text>
@@ -536,24 +643,24 @@ const CheckoutScreen = ({navigation, route}) => {
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>GST</Text>
             <Text style={styles.priceValue}>
-              ₹{(total * 0.18).toLocaleString()}
+              ₹{gstAmount.toLocaleString()}
             </Text>
           </View>
           <View style={[styles.divider, {marginVertical: 12}]} />
           <View style={styles.priceRow}>
             <Text style={styles.totalLabel}>Total Payable</Text>
             <Text style={styles.totalValue}>
-              ₹{(total * 1.18).toLocaleString()}
+              ₹{grandTotal.toLocaleString()}
             </Text>
           </View>
         </View>
       </ScrollView>
 
       {/* Checkout Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, {paddingBottom: insets.bottom + 16}]}>
         <View style={styles.footerPrice}>
           <Text style={styles.footerTotal}>
-            ₹{(total * 1.18).toLocaleString()}
+            ₹{grandTotal.toLocaleString()}
           </Text>
           <Text style={styles.footerText}>
             {paymentMethod === 'razorpay' ? 'Pay via Razorpay' : 'Cash on Delivery'}
@@ -593,7 +700,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   section: {
     backgroundColor: '#fff',
@@ -818,6 +925,33 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
+  },
+  appliedCouponRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  appliedCouponText: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#065F46',
+  },
+  removeCouponText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#DC2626',
+  },
+  couponError: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#DC2626',
   },
 
   // Payment styles

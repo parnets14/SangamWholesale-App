@@ -1,17 +1,17 @@
-import React, {useState, useRef} from 'react';
+﻿import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Platform,
   ScrollView,
   Alert,
   ToastAndroid,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
 import {ENDPOINTS} from '../../config/api';
@@ -85,9 +85,10 @@ const BusinessDetailsScreen = () => {
   const isButtonDisabled = !businessName.trim() || loading;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <ScrollView
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
+        <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
@@ -133,7 +134,8 @@ const BusinessDetailsScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 };
 

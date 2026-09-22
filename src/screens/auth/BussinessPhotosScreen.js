@@ -1,10 +1,9 @@
-import React, {useState} from 'react';
+﻿import React, {useState} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Image,
   PermissionsAndroid,
@@ -13,6 +12,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {launchCamera} from 'react-native-image-picker';
@@ -181,7 +181,7 @@ const BussinessPhotosScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Custom Header */}
       {/* <View style={styles.headerContainer}>

@@ -1,14 +1,14 @@
-import React, {useState} from 'react';
+ï»¿import React, {useState} from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const UserDetailsScreen = ({navigation, route}) => {
   const {token, user} = route.params || {};
@@ -34,7 +34,7 @@ const UserDetailsScreen = ({navigation, route}) => {
       );
       const data = await response.json();
       if (response.ok && data.success) {
-        // Do NOT call login() yet — BusinessDetails still needed on auth stack
+        // Do NOT call login() yet ï¿½ BusinessDetails still needed on auth stack
         // Pass token and updated user forward
         const updatedUser = {
           ...user,
@@ -59,9 +59,10 @@ const UserDetailsScreen = ({navigation, route}) => {
   const isButtonDisabled = fullName.trim().length === 0 || loading;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <ScrollView
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
+        <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
@@ -104,7 +105,8 @@ const UserDetailsScreen = ({navigation, route}) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 };
 

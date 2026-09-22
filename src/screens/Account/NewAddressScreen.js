@@ -1,4 +1,4 @@
-// CreateAddressScreen.js
+﻿// CreateAddressScreen.js
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Alert,
   Dimensions,
@@ -15,6 +14,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import StepIndicator from 'react-native-step-indicator';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from '@react-native-community/geolocation';
@@ -918,7 +918,7 @@ const NewAddressScreen = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" backgroundColor="#7B2533" />
 
       {/* Header */}

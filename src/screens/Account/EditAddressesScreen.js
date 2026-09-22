@@ -1,11 +1,10 @@
-import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Linking,
@@ -14,6 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -305,7 +305,7 @@ const EditAddressesScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
         {/* Header */}
         <View style={styles.headerContainer}>
@@ -332,7 +332,7 @@ const EditAddressesScreen = () => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity

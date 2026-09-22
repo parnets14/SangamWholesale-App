@@ -1,10 +1,9 @@
-import React, {useRef, useState, useEffect} from 'react';
+ï»¿import React, {useRef, useState, useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Dimensions,
@@ -13,6 +12,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import BottomSheet from 'react-native-raw-bottom-sheet';
@@ -331,17 +331,17 @@ const EditBusinessDetailsScreen = () => {
               </View>
               <Text style={styles.howItWorksTitle}>How does it work?</Text>
               <Text style={styles.howItWorksText}>
-                • To create a new vacation, select 'Start Date' and 'End Date'
+                ï¿½ To create a new vacation, select 'Start Date' and 'End Date'
                 and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                • To modify a vacation, update date(s) and click save.
+                ï¿½ To modify a vacation, update date(s) and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                • Maximum allowed duration for setting vacation is 30 days.
+                ï¿½ Maximum allowed duration for setting vacation is 30 days.
               </Text>
               <Text style={styles.howItWorksText}>
-                • You are allowed to set vacation for a maximum of 40 days in a
+                ï¿½ You are allowed to set vacation for a maximum of 40 days in a
                 6 month period (each half of the year). Which is 80 days in a
                 year.
               </Text>
@@ -441,7 +441,7 @@ const EditBusinessDetailsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
       {/* Header */}
       <View style={styles.headerContainer}>
