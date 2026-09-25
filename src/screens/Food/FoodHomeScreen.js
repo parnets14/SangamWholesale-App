@@ -1,5 +1,6 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
-import React, {useEffect, useState} from 'react';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import React, {useEffect, useState, useCallback} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   View,
   Text,
@@ -22,6 +23,7 @@ import axios from 'axios';
 import {useWishlist} from '../../context/WishlistContext';
 import {useCart} from '../../context/CartContext';
 import {useAuth} from '../../context/AuthContext';
+import {getUnreadCount} from '../../utils/notificationStore';
 
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 3;
@@ -39,6 +41,14 @@ const FoodHomeScreen = ({navigation}) => {
   const [error, setError] = useState(null);
   const {wishlist} = useWishlist();
   const {getItemCount} = useCart();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Refresh unread badge every time screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      getUnreadCount().then(setUnreadCount);
+    }, []),
+  );
 
   const fetchBanners = async () => {
     try {
@@ -47,7 +57,7 @@ const FoodHomeScreen = ({navigation}) => {
         'https://sangamwholesale.com/api/banners/',
       );
       console.log('Banners response:', response.data);
-      // Backend stores images as array per banner � flatten all images into one list
+      // Backend stores images as array per banner ? flatten all images into one list
       const allBanners = response.data.banners || [];
       const flatImages = [];
       allBanners.forEach(banner => {
@@ -267,6 +277,18 @@ const FoodHomeScreen = ({navigation}) => {
               </TouchableOpacity>
             </View>
             <View style={styles.headerIcons}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => navigation.navigate('Notifications')}>
+                <Icon name="bell" size={20} color="#fff" />
+                {unreadCount > 0 && (
+                  <View style={styles.cartBadge}>
+                    <Text style={styles.badgeText}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => navigation.navigate('Wishlist')}>
@@ -662,35 +684,40 @@ const styles = StyleSheet.create({
   },
   wishlistBadge: {
     position: 'absolute',
-    top: -2,
-    right: 18,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'green',
+    top: -6,
+    right: -8,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#2E7D32',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
     zIndex: 2,
+    borderWidth: 1.5,
+    borderColor: '#7B2533',
   },
   cartBadge: {
     position: 'absolute',
-    top: -2,
-    right: -12,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'green',
+    top: -6,
+    right: -8,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#2E7D32',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
     zIndex: 2,
+    borderWidth: 1.5,
+    borderColor: '#7B2533',
   },
   badgeText: {
     color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
     textAlign: 'center',
+    lineHeight: 13,
   },
 });
 

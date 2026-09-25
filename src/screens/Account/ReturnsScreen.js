@@ -291,7 +291,7 @@ export default function ReturnsScreen() {
           <Text style={styles.orderRowId}>Order #{item.orderId}</Text>
           <Text style={styles.orderRowSub}>
             {item.items?.length} item{item.items?.length !== 1 ? 's' : ''}
-            {item.total ? ` · ₹${item.total.toLocaleString()}` : ''}
+            {item.total ? ` · \u20B9${item.total.toLocaleString()}` : ''}
           </Text>
           {item.createdAt && (
             <Text style={styles.orderRowDate}>
@@ -390,7 +390,7 @@ export default function ReturnsScreen() {
       {loadingOrders ? (
         <View style={styles.sheetCenter}>
           <ActivityIndicator size="large" color="#7B2533" />
-          <Text style={styles.sheetCenterTxt}>Loading your orders�</Text>
+          <Text style={styles.sheetCenterTxt}>Loading your orders?</Text>
         </View>
       ) : step === 1 ? (
         orders.length === 0 ? (

@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
 
 /**
@@ -78,12 +79,18 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
+    externalNativeBuild {
+        cmake {
+            version "3.31.1"
+        }
+    }
+
     namespace "com.sangamwholesale"
     defaultConfig {
         applicationId "com.sangamwholesale"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 12
+        versionCode 14
         versionName "1.0"
 
         // Keep in sync with reactNativeArchitectures in gradle.properties.

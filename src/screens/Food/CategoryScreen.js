@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -176,7 +176,7 @@ const CategoryScreen = ({navigation, route}) => {
             </View>
           </View>
 
-          {/* Single FlatList � no ScrollView wrapper to avoid nesting warning */}
+          {/* Single FlatList ? no ScrollView wrapper to avoid nesting warning */}
           <FlatList
             data={subCategories.filter(sub =>
               sub.name.toLowerCase().includes(searchQuery.toLowerCase()),

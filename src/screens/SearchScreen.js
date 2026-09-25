@@ -95,7 +95,7 @@ const SearchScreen = ({navigation}) => {
         <Text style={styles.desc} numberOfLines={1}>
           {item.description}
         </Text>
-        <Text style={styles.price}>₹{item.price}</Text>
+        <Text style={styles.price}>{'\u20B9'}{item.price}</Text>
       </View>
     </TouchableOpacity>
   );

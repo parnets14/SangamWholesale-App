@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Share,
   Dimensions,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
@@ -25,6 +25,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const {user, token} = useAuth();
   console.log('Product Details:', product);
   const {theme} = useTheme();
+  const insets = useSafeAreaInsets();
   const {isWishlisted, toggleWishlist} = useWishlist();
   const {getItemCount, getCartQuantity} = useCart();
   const [quantity, setQuantity] = useState(1);
@@ -46,7 +47,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this product: ${product.name}\nOnly ₹${product.price}/${product.unit}\n\nOrder now on Udaan!`,
+        message: `Check out this product: ${product.name}\nOnly \u20B9${product.price}/${product.unit}\n\nOrder now on Udaan!`,
         url: `https://udaan.com/product/${product._id}`,
         title: product.name,
       });
@@ -67,7 +68,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const totalSavings = hasDiscount ? product.discountPrice * quantity : 0;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']}
+    <SafeAreaView edges={['top']}
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
@@ -98,7 +99,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
-        contentContainerStyle={{paddingBottom: 120}}>
+        contentContainerStyle={{paddingBottom: 120 + (insets.bottom > 0 ? insets.bottom : 0)}}>
         {/* Enhanced Product Image */}
         <View style={styles.imageContainer}>
           <Image
@@ -183,17 +184,17 @@ const ProductDetailsScreen = ({navigation, route}) => {
           {/* Price Section */}
           <View style={styles.priceSection}>
             <View style={styles.priceRow}>
-              <Text style={styles.currentPrice}>₹{product.price}</Text>
+              <Text style={styles.currentPrice}>{'\u20B9'}{product.price}</Text>
               <Text style={styles.unitText}>
                 {[product.quantity, product.unit].filter(Boolean).join(' ')}
               </Text>
               {hasDiscount && (
-                <Text style={styles.originalPrice}>₹{originalPrice}</Text>
+                <Text style={styles.originalPrice}>{'\u20B9'}{originalPrice}</Text>
               )}
             </View>
             {hasDiscount && (
               <Text style={styles.savingsText}>
-                {`You save ₹${product.discountPrice} (${product.quantity} ${product.unit})`}
+                {`You save \u20B9${product.discountPrice} (${product.quantity} ${product.unit})`}
               </Text>
             )}
           </View>
@@ -237,11 +238,11 @@ const ProductDetailsScreen = ({navigation, route}) => {
             </View>
             <View style={styles.quantityInfo}>
               <Text style={[styles.quantityPrice, {color: theme.textColor}]}>
-                Total: ₹{totalPrice}
+                Total: {'\u20B9'}{totalPrice}
               </Text>
               {totalSavings > 0 && (
                 <Text style={styles.quantitySavings}>
-                  Save: ₹{totalSavings}
+                  Save: {'\u20B9'}{totalSavings}
                 </Text>
               )}
             </View>
@@ -331,7 +332,10 @@ const ProductDetailsScreen = ({navigation, route}) => {
 
       {/* Enhanced Bottom Action Bar */}
       {/* ── Bottom Action Bar ── */}
-      <View style={[styles.bottomBar, {backgroundColor: theme.backgroundColor}]}>
+      <View style={[styles.bottomBar, {
+        backgroundColor: theme.backgroundColor,
+        paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+      }]}>
         <View style={styles.bottomContent}>
           {/* Price summary */}
           <View style={styles.priceSummary}>
@@ -340,10 +344,10 @@ const ProductDetailsScreen = ({navigation, route}) => {
             </Text>
             <View style={styles.summaryPriceRow}>
               <Text style={styles.summaryPrice}>
-                ₹{cartQty > 0 ? product.price * cartQty : totalPrice}
+                {'\u20B9'}{cartQty > 0 ? product.price * cartQty : totalPrice}
               </Text>
               {totalSavings > 0 && (
-                <Text style={styles.summarySavings}>Save ₹{totalSavings}</Text>
+                <Text style={styles.summarySavings}>Save {'\u20B9'}{totalSavings}</Text>
               )}
             </View>
           </View>
@@ -362,7 +366,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
         visible={toastVisible}
         product={{...product, quantity: cartQty || quantity}}
         cartCount={getItemCount()}
-        bottomOffset={76}
+        bottomOffset={76 + (insets.bottom > 0 ? insets.bottom : 12)}
         onViewCart={() => navigation.navigate('Cart')}
         onDismiss={() => setToastVisible(false)}
       />

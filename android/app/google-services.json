@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "524425666093",
+    "project_id": "sangam-73dda",
+    "storage_bucket": "sangam-73dda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524425666093:android:62666746ccd074948b62a4",
+        "android_client_info": {
+          "package_name": "com.sangamwholesale"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBF7P69nAXjkFmQ2hDmMAx_dXmNLvJ2dTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

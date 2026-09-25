@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CartToast — Zepto / Blinkit style "Added to cart" snackbar.
  *
  * • Slides up from just above the bottom action bar
@@ -134,7 +134,7 @@ const CartToast = ({
             {product?.name}
           </Text>
           <Text style={styles.meta}>
-            ₹{product?.price}
+            {'\u20B9'}{product?.price}
             {product?.unit ? `  ·  ${product.quantity} ${product.unit}` : ''}
           </Text>
         </View>

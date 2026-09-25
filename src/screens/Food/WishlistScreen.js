@@ -73,7 +73,7 @@ const WishlistScreen = ({navigation}) => {
           <Text style={styles.name} numberOfLines={2}>
             {item.name}
           </Text>
-          <Text style={styles.price}>₹{item.price}</Text>
+          <Text style={styles.price}>{'\u20B9'}{item.price}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

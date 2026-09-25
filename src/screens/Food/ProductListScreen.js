@@ -142,7 +142,7 @@ const ProductListScreen = ({navigation, route}) => {
           </Text>
           <View style={styles.priceRow}>
             <Text style={[styles.productPrice, {color: theme.primaryColor}]}>
-              ₹{item.price?.toLocaleString('en-IN') || item.price}
+              {'\u20B9'}{item.price?.toLocaleString('en-IN') || item.price}
             </Text>
             {/* Zepto-style inline stepper */}
             <AddToCartStepper
@@ -259,7 +259,7 @@ const ProductListScreen = ({navigation, route}) => {
         </View>
       </View>
 
-      {/* Bottom Cart Bar — shows when cart has items */}
+      {/* Bottom Cart Bar - shows when cart has items */}
       {getItemCount() > 0 && (
         <TouchableOpacity
           style={styles.bottomCartBar}

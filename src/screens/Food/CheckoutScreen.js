@@ -53,7 +53,7 @@ const CheckoutScreen = ({navigation, route}) => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
 
-  // ── Price calculation (single source of truth) ──────────────────────────
+  // -- Price calculation (single source of truth) --------------------------
   const discount = (() => {
     if (!appliedCoupon) return 0;
     let d =
@@ -88,7 +88,7 @@ const CheckoutScreen = ({navigation, route}) => {
 
     if (total < found.minOrder) {
       setCouponError(
-        `Minimum order of ₹${found.minOrder.toLocaleString()} required for this coupon`,
+        `Minimum order of \u20B9${found.minOrder.toLocaleString()} required for this coupon`,
       );
       setAppliedCoupon(null);
       return;
@@ -188,7 +188,7 @@ const CheckoutScreen = ({navigation, route}) => {
     }
 
     if (paymentMethod === 'razorpay') {
-      // ── Online payment: open Razorpay, then place order after verification ──
+      // -- Online payment: open Razorpay, then place order after verification --
       setPlacingOrder(true);
       openRazorpay({
         amount: grandTotal,
@@ -209,7 +209,7 @@ const CheckoutScreen = ({navigation, route}) => {
         },
       });
     } else {
-      // ── Cash on Delivery ─────────────────────────────────────────────────
+      // -- Cash on Delivery -------------------------------------------------
       setPlacingOrder(true);
       await submitOrder({paymentMethod: 'cod', paymentStatus: 'pending'});
       setPlacingOrder(false);
@@ -341,10 +341,10 @@ const CheckoutScreen = ({navigation, route}) => {
       </View>
       <View style={styles.orderItemPricing}>
         <Text style={styles.orderItemPrice}>
-          ₹{(item.price * item.quantity).toLocaleString()}
+          {'\u20B9'}{(item.price * item.quantity).toLocaleString()}
         </Text>
         <Text style={styles.orderItemUnitPrice}>
-          ₹{item.price.toLocaleString()}/{item.quantity} {item.unit}
+          {'\u20B9'}{item.price.toLocaleString()}/{item.quantity} {item.unit}
         </Text>
       </View>
     </View>
@@ -451,7 +451,7 @@ const CheckoutScreen = ({navigation, route}) => {
     const isDisabled = !selectedAddress || addresses.length === 0 || placingOrder;
     const buttonLabel =
       placingOrder
-        ? 'Processing…'
+        ? 'Processing-'
         : paymentMethod === 'razorpay'
         ? 'Pay Now'
         : 'Place Order';
@@ -624,7 +624,7 @@ const CheckoutScreen = ({navigation, route}) => {
             <Text style={styles.priceLabel}>
               Subtotal ({items.length} items)
             </Text>
-            <Text style={styles.priceValue}>₹{total.toLocaleString()}</Text>
+            <Text style={styles.priceValue}>{'\u20B9'}{total.toLocaleString()}</Text>
           </View>
           {discount > 0 && (
             <View style={styles.priceRow}>
@@ -632,7 +632,7 @@ const CheckoutScreen = ({navigation, route}) => {
                 Discount ({appliedCoupon.code})
               </Text>
               <Text style={[styles.priceValue, {color: '#10B981'}]}>
-                -₹{discount.toLocaleString()}
+                -{'\u20B9'}{discount.toLocaleString()}
               </Text>
             </View>
           )}
@@ -643,14 +643,14 @@ const CheckoutScreen = ({navigation, route}) => {
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>GST</Text>
             <Text style={styles.priceValue}>
-              ₹{gstAmount.toLocaleString()}
+              {'\u20B9'}{gstAmount.toLocaleString()}
             </Text>
           </View>
           <View style={[styles.divider, {marginVertical: 12}]} />
           <View style={styles.priceRow}>
             <Text style={styles.totalLabel}>Total Payable</Text>
             <Text style={styles.totalValue}>
-              ₹{grandTotal.toLocaleString()}
+              {'\u20B9'}{grandTotal.toLocaleString()}
             </Text>
           </View>
         </View>
@@ -660,7 +660,7 @@ const CheckoutScreen = ({navigation, route}) => {
       <View style={[styles.footer, {paddingBottom: insets.bottom + 16}]}>
         <View style={styles.footerPrice}>
           <Text style={styles.footerTotal}>
-            ₹{grandTotal.toLocaleString()}
+            {'\u20B9'}{grandTotal.toLocaleString()}
           </Text>
           <Text style={styles.footerText}>
             {paymentMethod === 'razorpay' ? 'Pay via Razorpay' : 'Cash on Delivery'}

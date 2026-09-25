@@ -44,6 +44,7 @@ import CheckoutScreen from '../screens/Food/CheckoutScreen';
 import TermsOfUseScreen from '../screens/TermsOfUseScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import PopularCategoriesScreen from '../screens/Food/PopularCategoriesScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -294,8 +295,9 @@ const AppNavigator = () => {
             <Stack.Screen name="Wishlist" component={WishlistScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="PopularCategories" component={PopularCategoriesScreen} />
-            {/* SpecialOffers placeholder — uses CategoryScreen until a dedicated screen is built */}
+            {/* SpecialOffers placeholder â€” uses CategoryScreen until a dedicated screen is built */}
             <Stack.Screen name="SpecialOffers" component={CategoryScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
           </>
         )}
       </Stack.Navigator>

@@ -1,4 +1,4 @@
-﻿// CreateAddressScreen.js
+// CreateAddressScreen.js
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
@@ -13,6 +13,8 @@ import {
   Modal,
   FlatList,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import StepIndicator from 'react-native-step-indicator';
@@ -23,7 +25,7 @@ import {useAuth} from '../../context/AuthContext';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAHFoepvVjrlMUctcC4wn_VRpOznZBzmhA';
 
-const {height} = Dimensions.get('window');
+const {height, width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const NewAddressScreen = ({navigation, route}) => {
   const {token} = useAuth();
@@ -45,6 +47,7 @@ const NewAddressScreen = ({navigation, route}) => {
     longitude: 77.5946,
   });
   const [mapReady, setMapReady] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const mapRef = useRef(null);
   const placesRef = useRef(null);
@@ -139,7 +142,7 @@ const NewAddressScreen = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    // Silently get location in background � doesn't block screen render
+    // Silently get location in background ? doesn't block screen render
     getCurrentLocation();
     // Delay map mount to avoid blank screen on init
     const timer = setTimeout(() => setMapReady(true), 300);
@@ -457,17 +460,43 @@ const NewAddressScreen = ({navigation, route}) => {
       <View style={{paddingHorizontal: 16, paddingTop: 12, zIndex: 99}}>
         <Text style={styles.label}>Search Location</Text>
         <GooglePlacesAutocomplete
+          ref={placesRef}
           placeholder="Search area, street, landmark..."
           fetchDetails={true}
           predefinedPlaces={[]}
           minLength={2}
           debounce={300}
+          timeout={20000}
+          disableScroll={false}
+          keyboardShouldPersistTaps="always"
+          listViewDisplayed="auto"
+          keepResultsAfterBlur={false}
+          showsVerticalScrollIndicator={true}
+          nestedScrollEnabled={true}
+          isRowScrollable={false}
+          numberOfLines={2}
           textInputProps={{
             autoFocus: false,
             blurOnSubmit: false,
+            returnKeyType: 'search',
             placeholderTextColor: '#9CA3AF',
+            clearButtonMode: 'never',
+            onChangeText: text => setShowSuggestions(text.trim().length >= 2),
           }}
+          renderRightButton={() => (
+            <TouchableOpacity
+              style={styles.clearSearchBtn}
+              onPress={() => {
+                placesRef.current?.setAddressText('');
+                placesRef.current?.clear?.();
+                setShowSuggestions(false);
+              }}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Icon name="close" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
           onPress={(data, details = null) => {
+            setShowSuggestions(false);
             if (!details) {
               console.log('No details returned for:', data?.description);
               return;
@@ -516,8 +545,9 @@ const NewAddressScreen = ({navigation, route}) => {
             const roadValue = road || details.formatted_address || '';
             if (roadValue) handleInputChange('shopNoRoad', roadValue);
           }}
-          onFail={error => console.log('GooglePlaces error:', error)}
-          onNotFound={() => console.log('GooglePlaces: no results')}
+          onFail={error => console.warn('GooglePlaces error:', error)}
+          onNotFound={() => console.warn('GooglePlaces: no results')}
+          onTimeout={() => console.warn('GooglePlaces: request timeout')}
           query={{
             key: GOOGLE_MAPS_API_KEY,
             language: 'en',
@@ -543,6 +573,7 @@ const NewAddressScreen = ({navigation, route}) => {
               borderColor: '#E0E0E0',
               borderRadius: 10,
               marginTop: 4,
+              maxHeight: 260,
               elevation: 8,
               shadowColor: '#000',
               shadowOffset: {width: 0, height: 2},
@@ -551,39 +582,58 @@ const NewAddressScreen = ({navigation, route}) => {
               zIndex: 999,
             },
             row: {
-              paddingVertical: 13,
+              paddingVertical: 14,
               paddingHorizontal: 14,
+              minHeight: 48,
+              justifyContent: 'center',
               borderBottomWidth: 1,
               borderBottomColor: '#F3F4F6',
             },
-            description: {fontSize: 14, color: '#374151'},
+            description: {fontSize: 14, color: '#1F2937'},
             poweredContainer: {display: 'none'},
           }}
           enablePoweredByContainer={false}
-          renderRow={rowData => (
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon name="place" size={14} color="#7B2533" style={{marginRight: 8}} />
-              <View style={{flex: 1}}>
-                <Text style={{fontSize: 14, color: '#111827', fontWeight: '500'}} numberOfLines={1}>
-                  {rowData.structured_formatting?.main_text || rowData.description}
-                </Text>
-                <Text style={{fontSize: 12, color: '#6B7280', marginTop: 1}} numberOfLines={1}>
-                  {rowData.structured_formatting?.secondary_text || ''}
-                </Text>
+          renderRow={rowData => {
+            const main =
+              rowData?.structured_formatting?.main_text ||
+              rowData?.description ||
+              '';
+            const secondary =
+              rowData?.structured_formatting?.secondary_text || '';
+            return (
+              <View style={styles.suggestionRow}>
+                <Icon
+                  name="place"
+                  size={18}
+                  color="#7B2533"
+                  style={{marginRight: 10}}
+                />
+                <View style={{width: SCREEN_WIDTH - 32 - 28 - 28}}>
+                  <Text style={styles.suggestionMain} numberOfLines={2}>
+                    {main}
+                  </Text>
+                  {secondary ? (
+                    <Text style={styles.suggestionSecondary} numberOfLines={1}>
+                      {secondary}
+                    </Text>
+                  ) : null}
+                </View>
               </View>
-            </View>
-          )}
+            );
+          }}
         />
         <Text style={styles.hintText}>
           Type your area or street to auto-fill address fields below
         </Text>
       </View>
 
-      {/* Rest of form in ScrollView � NO nested FlatList issue */}
+      {/* Rest of form in ScrollView ? NO nested FlatList issue */}
       <ScrollView
         style={styles.stepContainer}
+        contentContainerStyle={styles.stepScrollContent}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none">
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Shop Name on the Board</Text>
@@ -678,7 +728,9 @@ const NewAddressScreen = ({navigation, route}) => {
   const renderTimingsStep = () => (
     <ScrollView
       style={styles.stepContainer}
-      showsVerticalScrollIndicator={false}>
+      contentContainerStyle={styles.stepScrollContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled">
       <View style={styles.formGroup}>
         <Text style={styles.label}>Select Time</Text>
         <TouchableOpacity
@@ -806,7 +858,9 @@ const NewAddressScreen = ({navigation, route}) => {
   const renderGSTStep = () => (
     <ScrollView
       style={styles.stepContainer}
-      showsVerticalScrollIndicator={false}>
+      contentContainerStyle={styles.stepScrollContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled">
       <Text style={styles.sectionTitle}>Select GST Option</Text>
 
       <View style={styles.gstOptions}>
@@ -919,7 +973,7 @@ const NewAddressScreen = ({navigation, route}) => {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
-      <StatusBar backgroundColor="#7B2533" barStyle="light-content" backgroundColor="#7B2533" />
+      <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -942,7 +996,12 @@ const NewAddressScreen = ({navigation, route}) => {
       </View>
 
       {/* Step Content */}
-      <View style={styles.content}>{renderStepContent()}</View>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        {renderStepContent()}
+      </KeyboardAvoidingView>
 
       {/* Bottom Button */}
       <View style={styles.bottomContainer}>
@@ -1006,6 +1065,30 @@ const styles = StyleSheet.create({
   stepContainer: {
     flex: 1,
     padding: 16,
+  },
+  stepScrollContent: {
+    paddingBottom: 120,
+  },
+  clearSearchBtn: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    height: 48,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 44,
+  },
+  suggestionMain: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '500',
+  },
+  suggestionSecondary: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 1,
   },
   hintText: {
     fontSize: 12,

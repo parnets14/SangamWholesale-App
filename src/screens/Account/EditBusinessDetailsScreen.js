@@ -1,4 +1,4 @@
-﻿import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -331,17 +331,17 @@ const EditBusinessDetailsScreen = () => {
               </View>
               <Text style={styles.howItWorksTitle}>How does it work?</Text>
               <Text style={styles.howItWorksText}>
-                � To create a new vacation, select 'Start Date' and 'End Date'
+                ? To create a new vacation, select 'Start Date' and 'End Date'
                 and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                � To modify a vacation, update date(s) and click save.
+                ? To modify a vacation, update date(s) and click save.
               </Text>
               <Text style={styles.howItWorksText}>
-                � Maximum allowed duration for setting vacation is 30 days.
+                ? Maximum allowed duration for setting vacation is 30 days.
               </Text>
               <Text style={styles.howItWorksText}>
-                � You are allowed to set vacation for a maximum of 40 days in a
+                ? You are allowed to set vacation for a maximum of 40 days in a
                 6 month period (each half of the year). Which is 80 days in a
                 year.
               </Text>

@@ -1,4 +1,4 @@
-﻿import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
+import {ENDPOINTS, IMAGE_BASE} from '../../config/api';
 import React, {useEffect, useState} from 'react';
 import {
   View,

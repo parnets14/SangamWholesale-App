@@ -30,11 +30,15 @@ const DeliveriesScreen = () => {
   // Fetch deliveries from API
   useEffect(() => {
     fetchDeliveries();
+    // Live refresh every 15s so delivery status + OTP update on their own.
+    const id = setInterval(() => fetchDeliveries({silent: true}), 15000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchDeliveries = async () => {
+  const fetchDeliveries = async ({silent} = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
 
       const response = await fetch(
@@ -62,14 +66,18 @@ const DeliveriesScreen = () => {
             image: item.image || null,
             productId: item.productId || item._id,
           })),
-          totalValue: `₹${order.total.toLocaleString()}`,
-          status: getDeliveryStatus(order.status),
+          totalValue: `\u20B9${order.total.toLocaleString()}`,
+          // Prefer the delivery-partner lifecycle status when present.
+          deliveryStatus: order.deliveryStatus,
+          deliveryOtp: order.deliveryOtp,
+          deliveryPartnerName: order.deliveryPartner?.name || null,
+          status: getDeliveryStatus(order.deliveryStatus || order.status),
           expectedDelivery: getExpectedDeliveryDate(order.createdAt),
           trackingId: `TRK${order.orderId}`,
-          currentLocation: getCurrentLocation(order.status),
+          currentLocation: getCurrentLocation(order.deliveryStatus || order.status),
           deliveryAddress: order.deliveryAddress,
-          statusColor: getStatusColor(order.status),
-          progress: getProgress(order.status),
+          statusColor: getStatusColor(order.deliveryStatus || order.status),
+          progress: getProgress(order.deliveryStatus || order.status),
           paymentMethod: order.paymentMethod,
           orderNotes: order.orderNotes,
           createdAt: order.createdAt,
@@ -79,28 +87,32 @@ const DeliveriesScreen = () => {
         }));
 
         setDeliveries(transformedDeliveries);
-      } else {
+      } else if (!silent) {
         setError('Failed to load deliveries');
       }
     } catch (err) {
       console.error('Error fetching deliveries:', err);
-      setError('Network error. Please check your connection.');
+      if (!silent) setError('Network error. Please check your connection.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   // Helper functions to transform API data
   const getDeliveryStatus = apiStatus => {
     switch (apiStatus?.toLowerCase()) {
+      case 'placed':
       case 'pending':
         return 'Processing';
+      case 'accepted':
       case 'confirmed':
         return 'In Transit';
+      case 'out_for_delivery':
       case 'shipped':
         return 'Out for Delivery';
       case 'delivered':
         return 'Delivered';
+      case 'undelivered':
       case 'cancelled':
         return 'Cancelled';
       default:
@@ -110,14 +122,18 @@ const DeliveriesScreen = () => {
 
   const getStatusColor = apiStatus => {
     switch (apiStatus?.toLowerCase()) {
+      case 'placed':
       case 'pending':
         return '#7B2533';
+      case 'accepted':
       case 'confirmed':
         return '#F59E0B';
+      case 'out_for_delivery':
       case 'shipped':
         return '#8B5CF6';
       case 'delivered':
         return '#10B981';
+      case 'undelivered':
       case 'cancelled':
         return '#EF4444';
       default:
@@ -127,14 +143,18 @@ const DeliveriesScreen = () => {
 
   const getProgress = apiStatus => {
     switch (apiStatus?.toLowerCase()) {
+      case 'placed':
       case 'pending':
         return 25;
+      case 'accepted':
       case 'confirmed':
-        return 50;
+        return 55;
+      case 'out_for_delivery':
       case 'shipped':
         return 85;
       case 'delivered':
         return 100;
+      case 'undelivered':
       case 'cancelled':
         return 0;
       default:
@@ -144,16 +164,20 @@ const DeliveriesScreen = () => {
 
   const getCurrentLocation = apiStatus => {
     switch (apiStatus?.toLowerCase()) {
+      case 'placed':
       case 'pending':
         return 'Warehouse - Processing';
+      case 'accepted':
       case 'confirmed':
-        return 'In Transit';
+        return 'Partner assigned';
+      case 'out_for_delivery':
       case 'shipped':
-        return 'Local Delivery Hub';
+        return 'Out for delivery';
       case 'delivered':
         return 'Delivered';
+      case 'undelivered':
       case 'cancelled':
-        return 'Cancelled';
+        return 'Delivery failed';
       default:
         return 'Processing';
     }
@@ -229,6 +253,11 @@ const DeliveriesScreen = () => {
             {new Date(item.createdAt).toLocaleString()}
           </Text>
           <Text style={styles.supplierName}>{item.supplierName}</Text>
+          {item.deliveryPartnerName && (
+            <Text style={styles.partnerName}>
+              🛵 Partner: {item.deliveryPartnerName}
+            </Text>
+          )}
           {item.contactNumber && (
             <TouchableOpacity
               onPress={() => Linking.openURL(`tel:${item.contactNumber}`)}>
@@ -263,7 +292,7 @@ const DeliveriesScreen = () => {
               })
             }>
             <Text style={styles.itemText}>
-              � {product.name} - {product.quantity} {product.unit}
+              {'\u2022'} {product.name} - {product.quantity} {product.unit}
             </Text>
           </TouchableOpacity>
         ))}
@@ -289,6 +318,20 @@ const DeliveriesScreen = () => {
           ))}
       </View>
 
+      {/* Delivery OTP - show to customer while out for delivery */}
+      {item.deliveryStatus === 'out_for_delivery' && item.deliveryOtp ? (
+        <View style={styles.otpCard}>
+          <View style={styles.otpHeaderRow}>
+            <Icon name="shield" size={16} color="#7B2533" />
+            <Text style={styles.otpTitle}>Delivery OTP</Text>
+          </View>
+          <Text style={styles.otpValue}>{item.deliveryOtp}</Text>
+          <Text style={styles.otpHint}>
+            Share this OTP with the delivery partner to confirm your delivery.
+          </Text>
+        </View>
+      ) : null}
+
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
@@ -305,7 +348,7 @@ const DeliveriesScreen = () => {
       {/* Delivery Info */}
       <View style={styles.deliveryInfo}>
         <View style={styles.infoRow}>
-          <Icon name="place" size={16} color="#666" />
+          <Icon name="map-pin" size={16} color="#666" />
           <Text style={styles.infoText} numberOfLines={2}>
             {item.deliveryAddress}
           </Text>
@@ -330,11 +373,11 @@ const DeliveriesScreen = () => {
         )}
         <View style={styles.infoRow}>
           <Icon name="file-text" size={16} color="#666" />
-          <Text style={styles.infoText}>Subtotal: ₹{item.subtotal}</Text>
+          <Text style={styles.infoText}>Subtotal: {'\u20B9'}{item.subtotal}</Text>
         </View>
         <View style={styles.infoRow}>
           <Icon name="percent" size={16} color="#666" />
-          <Text style={styles.infoText}>GST: ₹{item.gst}</Text>
+          <Text style={styles.infoText}>GST: {'\u20B9'}{item.gst}</Text>
         </View>
       </View>
 
@@ -619,6 +662,12 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
+  partnerName: {
+    fontSize: 13,
+    color: '#7B2533',
+    fontWeight: '600',
+    marginTop: 2,
+  },
   contactNumber: {
     fontSize: 12,
     color: '#888',
@@ -648,6 +697,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     fontStyle: 'italic',
+  },
+  otpCard: {
+    backgroundColor: '#7B25330D',
+    borderWidth: 1,
+    borderColor: '#7B253330',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  otpHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  otpTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#7B2533',
+    marginLeft: 6,
+  },
+  otpValue: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#7B2533',
+    letterSpacing: 8,
+    marginVertical: 6,
+  },
+  otpHint: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 17,
   },
   progressContainer: {
     flexDirection: 'row',

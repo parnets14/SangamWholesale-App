@@ -1,7 +1,14 @@
 // Centralized API configuration
-// Change this one value to point the whole app at a different server
+// Change HOST in this one place to point the whole app at a different server.
+//
+// LOCAL DEV (current): backend on this PC at port 5000, reached over USB.
+//   Run once:  adb reverse tcp:5000 tcp:5000
+//   Then the phone's localhost:5000 tunnels to this PC's backend over USB.
+//   (No WiFi / LAN IP / firewall needed with adb reverse.)
+// PRODUCTION: set HOST back to 'https://sangamwholesale.com'.
+export const HOST = 'https://sangamwholesale.com';
 
-export const BASE_URL = 'https://sangamwholesale.com/api';
+export const BASE_URL = `${HOST}/api`;
 
 // Razorpay
 export const RAZORPAY_KEY_ID = 'rzp_live_TadrWdNN9MTuis';
@@ -36,6 +43,9 @@ export const ENDPOINTS = {
   // Addresses
   ADDRESSES: `${BASE_URL}/addresses/`,
 
+  // Notifications
+  USER_NOTIFICATIONS: `${BASE_URL}/user/notifications`,
+
   // Returns
   RETURN_ORDERS: `${BASE_URL}/return-orders`,
 
@@ -53,9 +63,9 @@ export const ENDPOINTS = {
 
 // Image base URLs
 export const IMAGE_BASE = {
-  PRODUCTS: 'https://sangamwholesale.com/products/',
-  CATEGORIES: 'https://sangamwholesale.com/categories/',
-  SUBCATEGORIES: 'https://sangamwholesale.com/subcategories/',
-  BANNERS: 'https://sangamwholesale.com/',
-  BUSINESS: 'https://sangamwholesale.com/business/',
+  PRODUCTS: `${HOST}/products/`,
+  CATEGORIES: `${HOST}/categories/`,
+  SUBCATEGORIES: `${HOST}/subcategories/`,
+  BANNERS: `${HOST}/`,
+  BUSINESS: `${HOST}/business/`,
 };

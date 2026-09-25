@@ -1,4 +1,4 @@
-﻿import React, {useState, useMemo, useRef, useEffect} from 'react';
+import React, {useState, useMemo, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -64,7 +64,7 @@ const CartScreen = ({navigation}) => {
       selectedItems.has(item._id),
     );
     const totalAmount = selectedCartItems.reduce((total, item) => {
-      const price = parseInt((item.price + '').replace('₹', '')) || 0;
+      const price = parseInt((item.price + '').replace('\u20B9', '')) || 0;
       return total + price * item.quantity;
     }, 0);
     const totalItems = selectedCartItems.reduce(
@@ -74,8 +74,8 @@ const CartScreen = ({navigation}) => {
     const savings = selectedCartItems.reduce((total, item) => {
       if (item.originalPrice) {
         const original =
-          parseInt((item.originalPrice + '').replace('₹', '')) || 0;
-        const current = parseInt((item.price + '').replace('₹', '')) || 0;
+          parseInt((item.originalPrice + '').replace('\u20B9', '')) || 0;
+        const current = parseInt((item.price + '').replace('\u20B9', '')) || 0;
         return total + (original - current) * item.quantity;
       }
       return total;
@@ -136,9 +136,9 @@ const CartScreen = ({navigation}) => {
   /* ─────────────────  CART ITEM CARD  ───────────────── */
   const renderCartItem = item => {
     const isSelected = selectedItems.has(item._id);
-    const itemPrice = parseInt((item.price + '').replace('₹', '')) || 0;
+    const itemPrice = parseInt((item.price + '').replace('\u20B9', '')) || 0;
     const originalPrice = item.originalPrice
-      ? parseInt((item.originalPrice + '').replace('₹', '')) || 0
+      ? parseInt((item.originalPrice + '').replace('\u20B9', '')) || 0
       : null;
     const totalPrice = itemPrice * item.quantity;
     const discount = originalPrice
@@ -196,14 +196,14 @@ const CartScreen = ({navigation}) => {
           <View style={styles.cardBottomRow}>
             <View style={styles.cardPriceCol}>
               <View style={styles.priceLine}>
-                <Text style={styles.cardPrice}>₹{totalPrice}</Text>
+                <Text style={styles.cardPrice}>{'\u20B9'}{totalPrice}</Text>
                 {originalPrice && (
                   <Text style={styles.cardOriginal}>
-                    ₹{originalPrice * item.quantity}
+                    {'\u20B9'}{originalPrice * item.quantity}
                   </Text>
                 )}
               </View>
-              <Text style={styles.cardPerUnit}>₹{itemPrice} each</Text>
+              <Text style={styles.cardPerUnit}>{'\u20B9'}{itemPrice} each</Text>
             </View>
 
             {/* inline stepper */}
@@ -323,7 +323,7 @@ const CartScreen = ({navigation}) => {
           </Text>
           {calculations.savings > 0 && (
             <Text style={styles.savingsPill}>
-              Saving ₹{calculations.savings}
+              Saving {'\u20B9'}{calculations.savings}
             </Text>
           )}
         </TouchableOpacity>
@@ -338,21 +338,21 @@ const CartScreen = ({navigation}) => {
             <Text style={styles.billLabel}>
               Item total ({calculations.totalItems})
             </Text>
-            <Text style={styles.billValue}>₹{calculations.totalAmount}</Text>
+            <Text style={styles.billValue}>{'\u20B9'}{calculations.totalAmount}</Text>
           </View>
           {calculations.savings > 0 && (
             <View style={styles.billRow}>
               <Text style={[styles.billLabel, {color: '#22c55e'}]}>
                 Total savings
               </Text>
-              <Text style={styles.billSaving}>-₹{calculations.savings}</Text>
+              <Text style={styles.billSaving}>-{'\u20B9'}{calculations.savings}</Text>
             </View>
           )}
           <View style={styles.billDivider} />
           <View style={styles.billRow}>
             <Text style={styles.billTotalLabel}>To Pay</Text>
             <Text style={styles.billTotalValue}>
-              ₹{calculations.grandTotal}
+              {'\u20B9'}{calculations.grandTotal}
             </Text>
           </View>
         </View>
@@ -364,7 +364,7 @@ const CartScreen = ({navigation}) => {
       <View style={styles.checkoutBar}>
         <View style={styles.checkoutInfo}>
           <Text style={styles.checkoutTotal}>
-            ₹{calculations.grandTotal}
+            {'\u20B9'}{calculations.grandTotal}
           </Text>
           <Text style={styles.checkoutSub}>
             {calculations.totalItems} items · {selectedItems.size} selected
@@ -432,7 +432,7 @@ const CartScreen = ({navigation}) => {
                     {confirm.item.name}
                   </Text>
                   <Text style={styles.sheetProductMeta}>
-                    ₹{confirm.item.price} · Qty {confirm.item.quantity}
+                    {'\u20B9'}{confirm.item.price} · Qty {confirm.item.quantity}
                   </Text>
                 </View>
               </View>

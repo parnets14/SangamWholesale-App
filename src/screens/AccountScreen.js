@@ -55,7 +55,7 @@ const AccountScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Main Content */}
           <View style={styles.mainContent}>
-            {/* Name Card � shown above Setup your account */}
+            {/* Name Card - shown above Setup your account */}
             {(fullName || phone) && (
               <View style={styles.nameCard}>
                 <View style={styles.avatarContainer}>
@@ -139,7 +139,7 @@ const AccountScreen = ({navigation}) => {
               </View>
               <View style={styles.availabilityContainer}>
                 <Text style={styles.availabilityText}>
-                  Available 9 am to 6 pm � Monday to Saturday
+                  Available 9 am to 6 pm - Monday to Saturday
                 </Text>
               </View>
             </View>

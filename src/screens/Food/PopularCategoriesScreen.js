@@ -150,7 +150,7 @@ const PopularCategoriesScreen = ({navigation, route}) => {
       ...selectedProduct,
       quantity: quantity,
       unit: 'unit',
-      totalPrice: parseInt(selectedProduct.price.replace('₹', '')) * quantity,
+      totalPrice: parseInt(selectedProduct.price.replace('\u20B9', '')) * quantity,
     };
     
     addToCart(cartItem);
@@ -251,8 +251,8 @@ const PopularCategoriesScreen = ({navigation, route}) => {
             {/* Price Section */}
             <View style={styles.priceSection}>
               <View style={styles.priceRow}>
-                <Text style={styles.currentPrice}>₹{item.price}</Text>
-                <Text style={styles.originalPrice}>₹{item.originalPrice}</Text>
+                <Text style={styles.currentPrice}>{'\u20B9'}{item.price}</Text>
+                <Text style={styles.originalPrice}>{'\u20B9'}{item.originalPrice}</Text>
               </View>
               <Text style={styles.discountText}>{item.discount}</Text>
             </View>
@@ -396,7 +396,7 @@ const PopularCategoriesScreen = ({navigation, route}) => {
                     {selectedProduct.brand}
                   </Text>
                   <Text style={styles.quantityProductPrice}>
-                    ₹{selectedProduct.price}
+                    {'\u20B9'}{selectedProduct.price}
                   </Text>
                 </View>
               </View>
@@ -423,7 +423,7 @@ const PopularCategoriesScreen = ({navigation, route}) => {
                 <View style={styles.totalInfo}>
                   <Text style={styles.totalLabel}>Total:</Text>
                   <Text style={styles.totalPrice}>
-                    ₹{parseInt(selectedProduct.price.replace('₹', '')) * quantity}
+                    {'\u20B9'}{parseInt(selectedProduct.price.replace('\u20B9', '')) * quantity}
                   </Text>
                 </View>
                 <TouchableOpacity

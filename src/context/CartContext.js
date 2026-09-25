@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState, useEffect, useCallback} from 'react';
+﻿import React, {createContext, useContext, useState, useEffect, useCallback} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ENDPOINTS} from '../config/api';
 
@@ -151,7 +151,7 @@ export const CartProvider = ({children, token}) => {
     return cartItems.reduce(
       (total, item) =>
         total +
-        (parseInt((item.price + '').replace('₹', '').replace(',', '')) || 0) *
+        (parseInt((item.price + '').replace('\u20B9', '').replace(',', '')) || 0) *
           item.quantity,
       0,
     );
