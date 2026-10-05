@@ -30,6 +30,9 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const {getItemCount, getCartQuantity} = useCart();
   const [quantity, setQuantity] = useState(1);
   const [toastVisible, setToastVisible] = useState(false);
+  // Measured height of the floating bottom action bar so the ScrollView can
+  // reserve exactly the right amount of space on any screen size.
+  const [bottomBarHeight, setBottomBarHeight] = useState(0);
 
   const wishlisted = isWishlisted(product._id);
   const cartQty = getCartQuantity(product._id);
@@ -99,7 +102,15 @@ const ProductDetailsScreen = ({navigation, route}) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
-        contentContainerStyle={{paddingBottom: 120 + (insets.bottom > 0 ? insets.bottom : 0)}}>
+        contentContainerStyle={{
+          flexGrow: 1,
+          // Reserve space for the floating bottom bar + a little breathing room
+          // so the last card is never hidden on any device.
+          paddingBottom:
+            (bottomBarHeight > 0
+              ? bottomBarHeight
+              : 120 + (insets.bottom > 0 ? insets.bottom : 0)) + 24,
+        }}>
         {/* Enhanced Product Image */}
         <View style={styles.imageContainer}>
           <Image
@@ -332,7 +343,9 @@ const ProductDetailsScreen = ({navigation, route}) => {
 
       {/* Enhanced Bottom Action Bar */}
       {/* ── Bottom Action Bar ── */}
-      <View style={[styles.bottomBar, {
+      <View
+        onLayout={e => setBottomBarHeight(e.nativeEvent.layout.height)}
+        style={[styles.bottomBar, {
         backgroundColor: theme.backgroundColor,
         paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
       }]}>
