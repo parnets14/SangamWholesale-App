@@ -11,7 +11,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
@@ -32,6 +32,7 @@ const ProductListScreen = ({navigation, route}) => {
   const {getItemCount} = useCart();
   const [toastVisible, setToastVisible] = useState(false);
   const [lastAddedProduct, setLastAddedProduct] = useState(null);
+  const insets = useSafeAreaInsets();
 
   const fetchProducts = async (subCat) => {
     setLoading(true);
@@ -205,7 +206,10 @@ const ProductListScreen = ({navigation, route}) => {
             renderItem={renderSubCategory}
             keyExtractor={item => item._id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.sidebarContent}
+            contentContainerStyle={[
+              styles.sidebarContent,
+              getItemCount() > 0 && {paddingBottom: 80},
+            ]}
           />
         </View>
 
@@ -250,7 +254,10 @@ const ProductListScreen = ({navigation, route}) => {
               renderItem={renderProduct}
               keyExtractor={item => item._id}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
+              contentContainerStyle={[
+                styles.productsContainer,
+                getItemCount() > 0 && {paddingBottom: 80},
+              ]}
               ItemSeparatorComponent={() => (
                 <View style={styles.productSeparator} />
               )}
@@ -262,7 +269,7 @@ const ProductListScreen = ({navigation, route}) => {
       {/* Bottom Cart Bar - shows when cart has items */}
       {getItemCount() > 0 && (
         <TouchableOpacity
-          style={styles.bottomCartBar}
+          style={[styles.bottomCartBar, {paddingBottom: 14 + insets.bottom}]}
           onPress={() => navigation.navigate('Cart')}
           activeOpacity={0.92}>
           <View style={styles.cartBarLeft}>

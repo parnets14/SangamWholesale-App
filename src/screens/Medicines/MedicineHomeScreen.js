@@ -167,7 +167,7 @@ const MedicineHomeScreen = ({navigation}) => {
         backgroundColor="#7B2533"
         barStyle="light-content"
       />
-      <SafeAreaView edges={['top', 'bottom']}
+      <SafeAreaView edges={['top']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>

@@ -84,7 +84,18 @@ const FoodHomeScreen = ({navigation}) => {
 
       // More robust data handling
       const categoriesData = response.data?.categories || response.data || [];
-      setCategories(categoriesData.slice(0, 9));
+
+      // Sort by display order (matches admin panel logic):
+      // categories with an explicit numeric `order` go first (ascending),
+      // then any without an order, tie-broken by oldest createdAt first.
+      const sorted = [...categoriesData].sort((a, b) => {
+        const ao = typeof a.order === 'number' ? a.order : Infinity;
+        const bo = typeof b.order === 'number' ? b.order : Infinity;
+        if (ao !== bo) return ao - bo;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+
+      setCategories(sorted.slice(0, 9));
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -204,7 +215,7 @@ const FoodHomeScreen = ({navigation}) => {
   // Show loading only when both categories and main loading are true
   if (loading && categoriesLoading) {
     return (
-      <SafeAreaView edges={['top', 'bottom']}
+      <SafeAreaView edges={['top']}
         style={[
           styles.loaderContainer,
           {backgroundColor: theme.backgroundColor},
@@ -219,7 +230,7 @@ const FoodHomeScreen = ({navigation}) => {
 
   if (error && categories.length === 0) {
     return (
-      <SafeAreaView edges={['top', 'bottom']}
+      <SafeAreaView edges={['top']}
         style={[
           styles.errorContainer,
           {backgroundColor: theme.backgroundColor},
@@ -248,7 +259,7 @@ const FoodHomeScreen = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView edges={['top', 'bottom']}
+      <SafeAreaView edges={['top']}
         style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
         <View
           style={[styles.container, {backgroundColor: theme.backgroundColor}]}>

@@ -33,10 +33,12 @@ const CategoryScreen = ({navigation, route}) => {
         // Filter subcategories by category._id
         const filtered = response.data.subcategories.filter(sub => {
           const subCatId =
-            typeof sub.category === 'object' ? sub.category._id : sub.category;
+            sub.category && typeof sub.category === 'object'
+              ? sub.category._id
+              : sub.category;
           const catId =
-            typeof category === 'object' ? category._id : category;
-          return subCatId === catId;
+            category && typeof category === 'object' ? category._id : category;
+          return subCatId && subCatId === catId;
         });
         setSubCategories(filtered);
       } catch (err) {
@@ -46,7 +48,7 @@ const CategoryScreen = ({navigation, route}) => {
       }
     };
     fetchSubCategories();
-  }, [category._id]);
+  }, [category?._id]);
 
   const renderSubCategory = ({item}) => (
     <TouchableOpacity

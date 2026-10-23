@@ -35,7 +35,7 @@ const AccountScreen = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
-      <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
+      <SafeAreaView edges={['top']} style={styles.container}>
         {/* Header with Red Background */}
         <View style={styles.headerContainer}>
           <View style={styles.headerContent}>

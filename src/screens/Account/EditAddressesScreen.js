@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -21,6 +21,7 @@ import {useAuth} from '../../context/AuthContext';
 const EditAddressesScreen = () => {
   const navigation = useNavigation();
   const {token} = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -386,7 +387,7 @@ const EditAddressesScreen = () => {
 
         {/* Create New Address Button */}
         <TouchableOpacity
-          style={styles.createAddressButton}
+          style={[styles.createAddressButton, {marginBottom: 20 + insets.bottom}]}
           onPress={handleCreateNewAddress}
           activeOpacity={0.7}>
           <Icon name="plus" size={20} color="#ffffff" />

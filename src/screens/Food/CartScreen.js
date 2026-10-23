@@ -18,12 +18,16 @@ import {useCart} from '../../context/CartContext';
 
 const PRIMARY = '#7B2533';
 
-const CartScreen = ({navigation}) => {
+const CartScreen = ({navigation, route}) => {
   const {theme} = useTheme();
   const {cartItems, removeFromCart, updateQuantity, clearCart} = useCart();
   const [selectedItems, setSelectedItems] = useState(
     new Set(cartItems.map(item => item._id)),
   );
+
+  // If we arrive here from a successful order (e.g. user presses back from
+  // OrderInvoice), keep the last order available so we can surface a banner.
+  const lastOrder = route?.params?.lastOrder ?? null;
 
   // ── Remove-confirmation bottom sheet ──
   const [confirm, setConfirm] = useState({visible: false, mode: null, item: null});
@@ -85,7 +89,28 @@ const CartScreen = ({navigation}) => {
       totalAmount,
       totalItems,
       savings,
-      grandTotal: totalAmount,
+      // GST calculated per-item using each product's own gst% field
+      // (0 if the product has no GST set)
+      gstAmount: parseFloat(
+        selectedCartItems
+          .reduce((sum, item) => {
+            const price =
+              parseInt((item.price + '').replace('\u20B9', '').replace(',', '')) || 0;
+            const gstPct = Number(item.gst) || 0;
+            return sum + price * item.quantity * (gstPct / 100);
+          }, 0)
+          .toFixed(2),
+      ),
+      grandTotal: parseFloat(
+        selectedCartItems
+          .reduce((sum, item) => {
+            const price =
+              parseInt((item.price + '').replace('\u20B9', '').replace(',', '')) || 0;
+            const gstPct = Number(item.gst) || 0;
+            return sum + price * item.quantity * (1 + gstPct / 100);
+          }, 0)
+          .toFixed(2),
+      ),
       selectedCartItems,
     };
   }, [cartItems, selectedItems]);
@@ -126,7 +151,7 @@ const CartScreen = ({navigation}) => {
     }
     navigation.navigate('Checkout', {
       items: calculations.selectedCartItems,
-      total: calculations.totalAmount,
+      total: calculations.totalAmount,  // subtotal before GST — Checkout recalculates GST itself
     });
   };
 
@@ -188,9 +213,7 @@ const CartScreen = ({navigation}) => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.cardUnit}>
-            {item.quantity} {item.unit || 'unit'}
-          </Text>
+          <Text style={styles.cardUnit}>{item.unit || 'unit'}</Text>
 
           {/* price + stepper */}
           <View style={styles.cardBottomRow}>
@@ -204,6 +227,7 @@ const CartScreen = ({navigation}) => {
                 )}
               </View>
               <Text style={styles.cardPerUnit}>{'\u20B9'}{itemPrice} each</Text>
+              <Text style={styles.cardPerUnit}>{`GST: ${Number(item.gst) || 0}%`}</Text>
             </View>
 
             {/* inline stepper */}
@@ -237,6 +261,25 @@ const CartScreen = ({navigation}) => {
   /* ─────────────────  EMPTY STATE  ───────────────── */
   const EmptyCart = () => (
     <View style={styles.emptyContainer}>
+      {/* ── Order success banner (shown when cart was just cleared by a placed order) ── */}
+      {lastOrder && (
+        <View style={styles.successBanner}>
+          <View style={styles.successIconCircle}>
+            <Icon name="check-circle" size={32} color="#22c55e" />
+          </View>
+          <Text style={styles.successTitle}>Order Placed!</Text>
+          <Text style={styles.successOrderId}>#{lastOrder.orderId}</Text>
+          <Text style={styles.successAmount}>₹{lastOrder.total}</Text>
+          <TouchableOpacity
+            style={styles.invoiceDownloadBtn}
+            onPress={() => navigation.navigate('OrderInvoice', {order: lastOrder})}
+            activeOpacity={0.85}>
+            <Icon name="download" size={16} color="#fff" />
+            <Text style={styles.invoiceDownloadText}>Download Invoice</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.emptyIconContainer}>
         <Icon name="shopping-cart" size={56} color={PRIMARY} />
       </View>
@@ -288,7 +331,7 @@ const CartScreen = ({navigation}) => {
   if (cartItems.length === 0) {
     return (
       <SafeAreaView
-        edges={['top', 'bottom']}
+        edges={['top']}
         style={[styles.container, {backgroundColor: '#F4F5F7'}]}>
         <StatusBar backgroundColor={PRIMARY} barStyle="light-content" />
         <Header showClear={false} />
@@ -300,7 +343,7 @@ const CartScreen = ({navigation}) => {
   /* ─────────────────  MAIN RETURN  ───────────────── */
   return (
     <SafeAreaView
-      edges={['top', 'bottom']}
+      edges={['top']}
       style={[styles.container, {backgroundColor: '#F4F5F7'}]}>
       <StatusBar backgroundColor={PRIMARY} barStyle="light-content" />
       <Header showClear />
@@ -346,6 +389,12 @@ const CartScreen = ({navigation}) => {
                 Total savings
               </Text>
               <Text style={styles.billSaving}>-{'\u20B9'}{calculations.savings}</Text>
+            </View>
+          )}
+          {calculations.gstAmount > 0 && (
+            <View style={styles.billRow}>
+              <Text style={styles.billLabel}>GST</Text>
+              <Text style={styles.billValue}>+{'\u20B9'}{calculations.gstAmount}</Text>
             </View>
           )}
           <View style={styles.billDivider} />
@@ -688,6 +737,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+  },
+  /* order success banner */
+  successBanner: {
+    width: '100%',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1.5,
+    borderColor: '#86efac',
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  successIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#dcfce7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  successTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#15803d',
+    marginBottom: 2,
+  },
+  successOrderId: {
+    fontSize: 13,
+    color: '#166534',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  successAmount: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#15803d',
+    marginBottom: 14,
+  },
+  invoiceDownloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: PRIMARY,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+  },
+  invoiceDownloadText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
   },
   emptyIconContainer: {
     width: 120,

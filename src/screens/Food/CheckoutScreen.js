@@ -69,7 +69,18 @@ const CheckoutScreen = ({navigation, route}) => {
   })();
 
   const taxableAmount = Math.max(0, total - discount);
-  const gstAmount = parseFloat((taxableAmount * 0.18).toFixed(2));
+  const gstAmount = parseFloat(
+    (items || [])
+      .reduce((sum, item) => {
+        const price =
+          parseFloat(
+            (item.price + '').replace('\u20B9', '').replace(/,/g, ''),
+          ) || 0;
+        const gstPct = Number(item.gst) || 0;
+        return sum + (price * (item.quantity || 1) * gstPct) / 100;
+      }, 0)
+      .toFixed(2),
+  );
   const grandTotal = parseFloat((taxableAmount + gstAmount).toFixed(2));
 
   const applyCoupon = () => {
@@ -225,6 +236,7 @@ const CheckoutScreen = ({navigation, route}) => {
           image: item.image,
           price: item.price,
           quantity: item.quantity,
+          gst: item.gst ?? 0,
         })),
         deliveryAddress: formatAddress(selectedAddress),
         addressName: selectedAddress.shopName,
@@ -256,10 +268,8 @@ const CheckoutScreen = ({navigation, route}) => {
           ToastAndroid.LONG,
           ToastAndroid.CENTER,
         );
-        navigation.replace('FoodTab', {
-          orderId: data.order.orderId,
-          amount: data.order.total,
-        });
+        // Show the invoice screen with the full order details
+        navigation.replace('OrderInvoice', {order: data.order});
       } else {
         Alert.alert('Order Failed', data.message || 'Could not place order');
       }
@@ -477,7 +487,7 @@ const CheckoutScreen = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.container, {backgroundColor: '#F5F7FA'}]}>
+    <SafeAreaView edges={['top', 'bottom']} style={[styles.container, {backgroundColor: '#F5F7FA'}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
       {/* Header */}

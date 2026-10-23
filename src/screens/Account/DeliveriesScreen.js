@@ -65,6 +65,7 @@ const DeliveriesScreen = () => {
             unit: 'pieces',
             image: item.image || null,
             productId: item.productId || item._id,
+            price: item.price || 0,
           })),
           totalValue: `\u20B9${order.total.toLocaleString()}`,
           // Prefer the delivery-partner lifecycle status when present.
@@ -389,15 +390,50 @@ const DeliveriesScreen = () => {
         </View>
       )}
 
-      {/* Footer with Tracking */}
+      {/* Footer with Tracking + Invoice */}
       <View style={styles.cardFooter}>
         <Text style={styles.trackingId}>Tracking: {item.trackingId}</Text>
-        <TouchableOpacity
-          style={styles.trackButton}
-          onPress={() => handleTrackOrder(item.orderId, item.trackingId)}>
-          <Text style={styles.trackButtonText}>Track Order</Text>
-          <Icon name="external-link" size={14} color="#7B2533" />
-        </TouchableOpacity>
+        <View style={styles.footerActions}>
+          <TouchableOpacity
+            style={styles.trackButton}
+            onPress={() => handleTrackOrder(item.orderId, item.trackingId)}>
+            <Text style={styles.trackButtonText}>Track</Text>
+            <Icon name="external-link" size={14} color="#7B2533" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.invoiceButton}
+            onPress={() =>
+              navigation.navigate('OrderInvoice', {
+                fromDeliveries: true,
+                order: {
+                  orderId: item.orderId,
+                  items: item.items.map(p => ({
+                    _id: p.productId,
+                    name: p.name,
+                    image: p.image,
+                    price: p.price || 0,
+                    quantity: p.quantity,
+                  })),
+                  addressName: item.supplierName,
+                  addressContact: item.contactNumber,
+                  deliveryAddress: item.deliveryAddress,
+                  subtotal: item.subtotal,
+                  discount: item.discount || 0,
+                  gst: item.gst,
+                  total: parseFloat(
+                    (item.totalValue || '0').replace(/[^\d.]/g, ''),
+                  ),
+                  paymentMethod: item.paymentMethod,
+                  orderNotes: item.orderNotes,
+                  deliveryStatus: item.deliveryStatus,
+                  createdAt: item.createdAt,
+                },
+              })
+            }>
+            <Icon name="download" size={14} color="#fff" />
+            <Text style={styles.invoiceButtonText}>Invoice</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -805,6 +841,25 @@ const styles = StyleSheet.create({
     color: '#7B2533',
     fontWeight: '600',
     marginRight: 4,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  invoiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#7B2533',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    gap: 5,
+  },
+  invoiceButtonText: {
+    fontSize: 13,
+    color: '#fff',
+    fontWeight: '700',
   },
   scrollContainer: {
     flexGrow: 1,

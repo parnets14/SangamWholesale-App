@@ -27,8 +27,13 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   const {isWishlisted, toggleWishlist} = useWishlist();
-  const {getItemCount, getCartQuantity} = useCart();
-  const [quantity, setQuantity] = useState(1);
+  const {
+    getItemCount,
+    getCartQuantity,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+  } = useCart();
   const [toastVisible, setToastVisible] = useState(false);
   // Measured height of the floating bottom action bar so the ScrollView can
   // reserve exactly the right amount of space on any screen size.
@@ -36,6 +41,31 @@ const ProductDetailsScreen = ({navigation, route}) => {
 
   const wishlisted = isWishlisted(product._id);
   const cartQty = getCartQuantity(product._id);
+
+  // cartQty is the single source of truth for this screen. The "Select
+  // Quantity" card and the bottom AddToCartStepper both read it and write back
+  // through the cart, so the two controls can never disagree: bump either one
+  // and the other follows automatically.
+  const maxQty = product.stock && product.stock > 0 ? product.stock : 99;
+
+  // Deliberately mirrors AddToCartStepper's logic so both controls behave
+  // identically (add at 0, remove at 1, cap at stock).
+  const handleQtyDecrease = () => {
+    if (cartQty <= 1) {
+      removeFromCart(product._id);
+    } else {
+      updateQuantity(product._id, -1);
+    }
+  };
+
+  const handleQtyIncrease = () => {
+    if (cartQty === 0) {
+      addToCart({...product, quantity: 1});
+      setToastVisible(true);
+    } else if (cartQty < maxQty) {
+      updateQuantity(product._id, 1);
+    }
+  };
 
   const handleWishlist = () => {
     toggleWishlist(product._id);
@@ -67,11 +97,11 @@ const ProductDetailsScreen = ({navigation, route}) => {
     ? Math.round((product.discountPrice / originalPrice) * 100)
     : 0;
 
-  const totalPrice = product.price * quantity;
-  const totalSavings = hasDiscount ? product.discountPrice * quantity : 0;
+  const totalPrice = product.price * cartQty;
+  const totalSavings = hasDiscount ? product.discountPrice * cartQty : 0;
 
   return (
-    <SafeAreaView edges={['top']}
+    <SafeAreaView edges={['top', 'bottom']}
       style={[styles.safeArea, {backgroundColor: theme.backgroundColor}]}>
       <StatusBar backgroundColor="#7B2533" barStyle="light-content" />
 
@@ -121,9 +151,15 @@ const ProductDetailsScreen = ({navigation, route}) => {
           />
 
           {/* Stock Badge */}
-          <View style={styles.stockBadge}>
+          <View
+            style={[
+              styles.stockBadge,
+              {backgroundColor: product.stock > 0 ? '#16a34a' : '#6b7280'},
+            ]}>
             <Icon name="package" size={12} color="#fff" />
-            <Text style={styles.stockText}>{product.stock} in stock</Text>
+            <Text style={styles.stockText}>
+              {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+            </Text>
           </View>
 
           {/* Discount Badge */}
@@ -196,18 +232,24 @@ const ProductDetailsScreen = ({navigation, route}) => {
           <View style={styles.priceSection}>
             <View style={styles.priceRow}>
               <Text style={styles.currentPrice}>{'\u20B9'}{product.price}</Text>
-              <Text style={styles.unitText}>
-                {[product.quantity, product.unit].filter(Boolean).join(' ')}
-              </Text>
+              <Text style={styles.unitText}>{`per ${product.unit || 'unit'}`}</Text>
               {hasDiscount && (
                 <Text style={styles.originalPrice}>{'\u20B9'}{originalPrice}</Text>
               )}
             </View>
             {hasDiscount && (
               <Text style={styles.savingsText}>
-                {`You save \u20B9${product.discountPrice} (${product.quantity} ${product.unit})`}
+                {`You save \u20B9${product.discountPrice} (${discountPercent}% off)`}
               </Text>
             )}
+            {product.packSize ? (
+              <Text style={{fontSize: 13, color: theme.textColor, marginTop: 6, opacity: 0.85}}>
+                {`1 ${product.unit} = ${product.packSize} ${product.baseUnit}`}
+              </Text>
+            ) : null}
+            <Text style={{fontSize: 13, color: theme.textColor, marginTop: 4, opacity: 0.85}}>
+              {`GST: ${Number(product.gst) || 0}%`}
+            </Text>
           </View>
 
           {/* Description */}
@@ -227,24 +269,37 @@ const ProductDetailsScreen = ({navigation, route}) => {
           <View style={styles.quantityContainer}>
             <View style={styles.quantityControls}>
               <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() => setQuantity(q => Math.max(1, q - 1))}>
-                <Icon name="minus" size={18} color="#7B2533" />
+                style={[
+                  styles.quantityButton,
+                  cartQty === 0 && styles.quantityButtonDisabled,
+                ]}
+                onPress={handleQtyDecrease}
+                disabled={cartQty === 0}
+                activeOpacity={0.7}>
+                <Icon
+                  name="minus"
+                  size={18}
+                  color={cartQty === 0 ? '#c9c9c9' : '#7B2533'}
+                />
               </TouchableOpacity>
               <View style={styles.quantityDisplay}>
                 <Text style={[styles.quantityText, {color: theme.textColor}]}>
-                  {quantity}
-                </Text>
-                <Text style={[styles.quantityUnit, {color: theme.textColor}]}>
-                  {product.unit || ''}
+                  {cartQty}
                 </Text>
               </View>
               <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() =>
-                  setQuantity(q => Math.min(product.stock, q + 1))
-                }>
-                <Icon name="plus" size={18} color="#7B2533" />
+                style={[
+                  styles.quantityButton,
+                  cartQty >= maxQty && styles.quantityButtonDisabled,
+                ]}
+                onPress={handleQtyIncrease}
+                disabled={cartQty >= maxQty}
+                activeOpacity={0.7}>
+                <Icon
+                  name="plus"
+                  size={18}
+                  color={cartQty >= maxQty ? '#c9c9c9' : '#7B2533'}
+                />
               </TouchableOpacity>
             </View>
             <View style={styles.quantityInfo}>
@@ -310,7 +365,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
                 Type
               </Text>
               <Text style={[styles.specValue, {color: theme.textColor}]}>
-                {product.subcategory?.name || 'Premium Rice'}
+                {product.subcategory?.name || '—'}
               </Text>
             </View>
             <View style={styles.specItem}>
@@ -318,25 +373,42 @@ const ProductDetailsScreen = ({navigation, route}) => {
                 Unit
               </Text>
               <Text style={[styles.specValue, {color: theme.textColor}]}>
-                {[product.quantity, product.unit].filter(Boolean).join(' ')}
+                {product.unit || 'piece'}
+                {product.packSize
+                  ? ` (1 ${product.unit} = ${product.packSize} ${product.baseUnit})`
+                  : ''}
               </Text>
             </View>
             <View style={styles.specItem}>
               <Text style={[styles.specLabel, {color: theme.textColor}]}>
                 Stock
               </Text>
-              <Text style={[styles.specValue, {color: theme.textColor}]}>
-                {product.stock} available
+              <Text
+                style={[
+                  styles.specValue,
+                  {color: product.stock > 0 ? '#16a34a' : '#dc2626'},
+                ]}>
+                {product.stock > 0 ? `In stock (${product.stock})` : 'Out of stock'}
               </Text>
             </View>
             <View style={styles.specItem}>
               <Text style={[styles.specLabel, {color: theme.textColor}]}>
-                Quality
+                GST
               </Text>
               <Text style={[styles.specValue, {color: theme.textColor}]}>
-                Grade A
+                {Number(product.gst) || 0}%
               </Text>
             </View>
+            {product.brand ? (
+              <View style={styles.specItem}>
+                <Text style={[styles.specLabel, {color: theme.textColor}]}>
+                  Brand
+                </Text>
+                <Text style={[styles.specValue, {color: theme.textColor}]}>
+                  {product.brand}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
       </ScrollView>
@@ -357,7 +429,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
             </Text>
             <View style={styles.summaryPriceRow}>
               <Text style={styles.summaryPrice}>
-                {'\u20B9'}{cartQty > 0 ? product.price * cartQty : totalPrice}
+                {'\u20B9'}{totalPrice}
               </Text>
               {totalSavings > 0 && (
                 <Text style={styles.summarySavings}>Save {'\u20B9'}{totalSavings}</Text>
@@ -377,7 +449,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
       {/* Cart Toast — floats above bottom bar */}
       <CartToast
         visible={toastVisible}
-        product={{...product, quantity: cartQty || quantity}}
+        product={{...product, quantity: cartQty || 1}}
         cartCount={getItemCount()}
         bottomOffset={76 + (insets.bottom > 0 ? insets.bottom : 12)}
         onViewCart={() => navigation.navigate('Cart')}
@@ -626,9 +698,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
-  quantityUnit: {
-    fontSize: 12,
-    opacity: 0.7,
+  quantityButtonDisabled: {
+    backgroundColor: '#f1f1f1',
+    elevation: 0,
   },
   quantityInfo: {
     alignItems: 'flex-end',

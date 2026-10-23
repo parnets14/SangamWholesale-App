@@ -175,7 +175,7 @@ const NotificationsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.backgroundColor}]} edges={['top']}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.backgroundColor}]} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={[styles.header, {backgroundColor: theme.headerBackground}]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>

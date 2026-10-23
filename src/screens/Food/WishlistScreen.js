@@ -97,7 +97,7 @@ const WishlistScreen = ({navigation}) => {
   const cartCount = getItemCount();
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <StatusBar backgroundColor={PRIMARY} barStyle="light-content" />
 
       {/* Header */}

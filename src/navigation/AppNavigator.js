@@ -41,6 +41,7 @@ import ProductListScreen from '../screens/Food/ProductListScreen';
 import WishlistScreen from '../screens/Food/WishlistScreen';
 import UserDetailsScreen from '../screens/auth/UserDetailsScreen';
 import CheckoutScreen from '../screens/Food/CheckoutScreen';
+import OrderInvoiceScreen from '../screens/Food/OrderInvoiceScreen';
 import TermsOfUseScreen from '../screens/TermsOfUseScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import PopularCategoriesScreen from '../screens/Food/PopularCategoriesScreen';
@@ -294,6 +295,7 @@ const AppNavigator = () => {
             <Stack.Screen name="ProductList" component={ProductListScreen} />
             <Stack.Screen name="Wishlist" component={WishlistScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
+            <Stack.Screen name="OrderInvoice" component={OrderInvoiceScreen} />
             <Stack.Screen name="PopularCategories" component={PopularCategoriesScreen} />
             {/* SpecialOffers placeholder — uses CategoryScreen until a dedicated screen is built */}
             <Stack.Screen name="SpecialOffers" component={CategoryScreen} />
