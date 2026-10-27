@@ -11,7 +11,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
@@ -32,7 +32,6 @@ const ProductListScreen = ({navigation, route}) => {
   const {getItemCount} = useCart();
   const [toastVisible, setToastVisible] = useState(false);
   const [lastAddedProduct, setLastAddedProduct] = useState(null);
-  const insets = useSafeAreaInsets();
 
   const fetchProducts = async (subCat) => {
     setLoading(true);
@@ -269,7 +268,7 @@ const ProductListScreen = ({navigation, route}) => {
       {/* Bottom Cart Bar - shows when cart has items */}
       {getItemCount() > 0 && (
         <TouchableOpacity
-          style={[styles.bottomCartBar, {paddingBottom: 14 + insets.bottom}]}
+          style={[styles.bottomCartBar, {paddingBottom: 14}]}
           onPress={() => navigation.navigate('Cart')}
           activeOpacity={0.92}>
           <View style={styles.cartBarLeft}>

@@ -1,7 +1,7 @@
 ﻿import React, {useEffect, useRef} from 'react';
 import {StatusBar} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {AuthProvider, useAuth} from './src/context/AuthContext';
 import {CartProvider} from './src/context/CartContext';
 import {ThemeProvider, useTheme} from './src/context/ThemeContext';
@@ -20,6 +20,31 @@ const GlobalStatusBar = () => {
       barStyle={theme.statusBarStyle}
       translucent={false}
     />
+  );
+};
+
+/**
+ * AppShell
+ * One single place that keeps the whole app clear of the device's bottom
+ * system bar (gesture pill / 3-button navigation) on every screen size.
+ *
+ * The app targets SDK 35+ so Android draws it edge-to-edge and any bottom
+ * bar (cart checkout, product "Add", checkout footer, tab bar) ends up
+ * underneath the system navigation area. Wrapping the navigator once here
+ * adds exactly `insets.bottom` of space for every screen at once, instead of
+ * every screen having to guess the value itself.
+ *
+ * Only the bottom edge is applied on purpose - each screen already handles
+ * the top edge through its own SafeAreaView / header.
+ */
+const AppShell = ({children}) => {
+  const {theme} = useTheme();
+  return (
+    <SafeAreaView
+      edges={['bottom']}
+      style={{flex: 1, backgroundColor: theme.backgroundColor}}>
+      {children}
+    </SafeAreaView>
   );
 };
 
@@ -109,7 +134,9 @@ const App = () => {
       <ThemeProvider>
         <GlobalStatusBar />
         <AuthProvider>
-          <AppWithProviders />
+          <AppShell>
+            <AppWithProviders />
+          </AppShell>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

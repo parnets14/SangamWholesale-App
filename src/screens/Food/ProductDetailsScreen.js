@@ -11,7 +11,7 @@ import {
   Share,
   Dimensions,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useTheme} from '../../context/ThemeContext';
 import {useWishlist} from '../../context/WishlistContext';
@@ -25,7 +25,6 @@ const ProductDetailsScreen = ({navigation, route}) => {
   const {user, token} = useAuth();
   console.log('Product Details:', product);
   const {theme} = useTheme();
-  const insets = useSafeAreaInsets();
   const {isWishlisted, toggleWishlist} = useWishlist();
   const {
     getItemCount,
@@ -139,7 +138,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
           paddingBottom:
             (bottomBarHeight > 0
               ? bottomBarHeight
-              : 120 + (insets.bottom > 0 ? insets.bottom : 0)) + 24,
+              : 120) + 24,
         }}>
         {/* Enhanced Product Image */}
         <View style={styles.imageContainer}>
@@ -419,7 +418,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
         onLayout={e => setBottomBarHeight(e.nativeEvent.layout.height)}
         style={[styles.bottomBar, {
         backgroundColor: theme.backgroundColor,
-        paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+        paddingBottom: 12,
       }]}>
         <View style={styles.bottomContent}>
           {/* Price summary */}
@@ -451,7 +450,7 @@ const ProductDetailsScreen = ({navigation, route}) => {
         visible={toastVisible}
         product={{...product, quantity: cartQty || 1}}
         cartCount={getItemCount()}
-        bottomOffset={76 + (insets.bottom > 0 ? insets.bottom : 12)}
+        bottomOffset={88}
         onViewCart={() => navigation.navigate('Cart')}
         onDismiss={() => setToastVisible(false)}
       />

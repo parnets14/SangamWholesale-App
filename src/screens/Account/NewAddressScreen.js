@@ -10,8 +10,6 @@ import {
   StatusBar,
   Alert,
   Dimensions,
-  Modal,
-  FlatList,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -35,11 +33,6 @@ const NewAddressScreen = ({navigation, route}) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [showLunchPicker, setShowLunchPicker] = useState({
-    type: '',
-    show: false,
-  });
   const [gstVerified, setGstVerified] = useState(false);
   const [gstVerifying, setGstVerifying] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState({
@@ -61,60 +54,11 @@ const NewAddressScreen = ({navigation, route}) => {
     city: '',
     deliveryContact: '',
     saveAddressAs: '',
-    selectedTime: '',
-    weeklySchedule: {
-      Sunday: 'open',
-      Monday: 'open',
-      Tuesday: 'open',
-      Wednesday: 'open',
-      Thursday: 'open',
-      Friday: 'open',
-      Saturday: 'open',
-    },
-    lunchStart: '',
-    lunchEnd: '',
     gstOption: 'i_want_gst',
     gstin: '',
   });
 
-  const steps = ['Address', 'Timings', 'GST'];
-
-  const timeOptions = [
-    '09:00 AM',
-    '09:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '12:00 PM',
-    '12:30 PM',
-    '01:00 PM',
-    '01:30 PM',
-    '02:00 PM',
-    '02:30 PM',
-    '03:00 PM',
-    '03:30 PM',
-    '04:00 PM',
-    '04:30 PM',
-    '05:00 PM',
-    '05:30 PM',
-    '06:00 PM',
-    '06:30 PM',
-    '07:00 PM',
-    '07:30 PM',
-    '08:00 PM',
-    '08:30 PM',
-  ];
-
-  const lunchOptions = [
-    '12:00 PM',
-    '12:30 PM',
-    '01:00 PM',
-    '01:30 PM',
-    '02:00 PM',
-    '02:30 PM',
-    '03:00 PM',
-  ];
+  const steps = ['Address', 'GST'];
 
   // Step indicator configuration
   const stepIndicatorStyles = {
@@ -159,18 +103,6 @@ const NewAddressScreen = ({navigation, route}) => {
         city: editAddress.city || '',
         deliveryContact: editAddress.deliveryContact || '',
         saveAddressAs: editAddress.saveAddressAs || '',
-        selectedTime: editAddress.shopOpenTime || '',
-        weeklySchedule: editAddress.openClosedDays || {
-          Sunday: 'open',
-          Monday: 'open',
-          Tuesday: 'open',
-          Wednesday: 'open',
-          Thursday: 'open',
-          Friday: 'open',
-          Saturday: 'open',
-        },
-        lunchStart: editAddress.lunchTime?.lunchStart || '',
-        lunchEnd: editAddress.lunchTime?.lunchEnd || '',
         gstOption: editAddress.gstOption || 'i_want_gst',
         gstin: editAddress.gstin || '',
       });
@@ -217,16 +149,6 @@ const NewAddressScreen = ({navigation, route}) => {
     }
   };
 
-  const handleWeeklyScheduleChange = (day, status) => {
-    setFormData(prev => ({
-      ...prev,
-      weeklySchedule: {
-        ...prev.weeklySchedule,
-        [day]: status,
-      },
-    }));
-  };
-
   const validateStep = () => {
     const newErrors = {};
 
@@ -249,14 +171,6 @@ const NewAddressScreen = ({navigation, route}) => {
           newErrors.saveAddressAs = 'Address label is required';
         break;
       case 1:
-        if (!formData.selectedTime)
-          newErrors.selectedTime = 'Please select a time';
-        if (!formData.lunchStart && formData.lunchEnd)
-          newErrors.lunchStart = 'Please select lunch start time';
-        if (formData.lunchStart && !formData.lunchEnd)
-          newErrors.lunchEnd = 'Please select lunch end time';
-        break;
-      case 2:
         if (formData.gstOption === 'i_want_gst' && !formData.gstin.trim()) {
           newErrors.gstin = 'GSTIN is required';
         } else if (formData.gstOption === 'i_want_gst' && !gstVerified) {
@@ -296,12 +210,6 @@ const NewAddressScreen = ({navigation, route}) => {
         deliveryContact: formData.deliveryContact,
         saveAddress: true,
         default: true,
-        shopOpenTime: formData.selectedTime,
-        openClosedDays: formData.weeklySchedule,
-        lunchTime: {
-          lunchStart: formData.lunchStart,
-          lunchEnd: formData.lunchEnd,
-        },
         location: selectedLocation,
       };
       try {
@@ -368,91 +276,6 @@ const NewAddressScreen = ({navigation, route}) => {
       Alert.alert('Success', 'GSTIN verified successfully!');
     }, 2000);
   };
-
-  const renderTimePicker = () => (
-    <Modal
-      visible={showTimePicker}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowTimePicker(false)}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select Time</Text>
-            <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-              <Icon name="close" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={timeOptions}
-            keyExtractor={item => item}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={[
-                  styles.timeOption,
-                  formData.selectedTime === item && styles.selectedTimeOption,
-                ]}
-                onPress={() => {
-                  handleInputChange('selectedTime', item);
-                  setShowTimePicker(false);
-                }}>
-                <Text
-                  style={[
-                    styles.timeOptionText,
-                    formData.selectedTime === item &&
-                      styles.selectedTimeOptionText,
-                  ]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const renderLunchPicker = () => (
-    <Modal
-      visible={showLunchPicker.show}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowLunchPicker({type: '', show: false})}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
-              Select{' '}
-              {showLunchPicker.type === 'start' ? 'Lunch Start' : 'Lunch End'}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowLunchPicker({type: '', show: false})}>
-              <Icon name="close" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={lunchOptions}
-            keyExtractor={item => item}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={styles.timeOption}
-                onPress={() => {
-                  const field =
-                    showLunchPicker.type === 'start'
-                      ? 'lunchStart'
-                      : 'lunchEnd';
-                  handleInputChange(field, item);
-                  setShowLunchPicker({type: '', show: false});
-                }}>
-                <Text style={styles.timeOptionText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
 
   const renderAddressStep = () => (
     <View style={{flex: 1}}>
@@ -725,136 +548,6 @@ const NewAddressScreen = ({navigation, route}) => {
     </View>
   );
 
-  const renderTimingsStep = () => (
-    <ScrollView
-      style={styles.stepContainer}
-      contentContainerStyle={styles.stepScrollContent}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled">
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Select Time</Text>
-        <TouchableOpacity
-          style={[
-            styles.input,
-            styles.selectInput,
-            errors.selectedTime && styles.inputError,
-          ]}
-          onPress={() => setShowTimePicker(true)}>
-          <Text
-            style={[
-              styles.selectText,
-              !formData.selectedTime && styles.placeholder,
-            ]}>
-            {formData.selectedTime || 'Select Time'}
-          </Text>
-          <Icon name="keyboard-arrow-down" size={24} color="#9CA3AF" />
-        </TouchableOpacity>
-        {errors.selectedTime && (
-          <Text style={styles.errorText}>{errors.selectedTime}</Text>
-        )}
-      </View>
-
-      <View style={styles.formGroup}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Select Open / Closed Days</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>OPEN CLOSED</Text>
-          </View>
-        </View>
-
-        {Object.keys(formData.weeklySchedule).map(day => (
-          <View key={day} style={styles.dayRow}>
-            <Text style={styles.dayText}>{day}</Text>
-            <View style={styles.radioGroup}>
-              <TouchableOpacity
-                style={styles.radioContainer}
-                onPress={() => handleWeeklyScheduleChange(day, 'open')}>
-                <View
-                  style={[
-                    styles.radio,
-                    formData.weeklySchedule[day] === 'open' &&
-                      styles.radioSelected,
-                  ]}>
-                  {formData.weeklySchedule[day] === 'open' && (
-                    <View style={styles.radioInner} />
-                  )}
-                </View>
-                <Text style={styles.radioText}>Open</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.radioContainer}
-                onPress={() => handleWeeklyScheduleChange(day, 'closed')}>
-                <View
-                  style={[
-                    styles.radio,
-                    formData.weeklySchedule[day] === 'closed' &&
-                      styles.radioSelected,
-                  ]}>
-                  {formData.weeklySchedule[day] === 'closed' && (
-                    <View style={styles.radioInner} />
-                  )}
-                </View>
-                <Text style={styles.radioText}>Closed</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.formGroup}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Select Lunch Time</Text>
-          <Icon name="schedule" size={20} color="#9CA3AF" />
-        </View>
-
-        <View style={styles.rowContainer}>
-          <TouchableOpacity
-            style={[
-              styles.input,
-              styles.selectInput,
-              {flex: 1, marginRight: 10},
-              errors.lunchStart && styles.inputError,
-            ]}
-            onPress={() => setShowLunchPicker({type: 'start', show: true})}>
-            <Text
-              style={[
-                styles.selectText,
-                !formData.lunchStart && styles.placeholder,
-              ]}>
-              {formData.lunchStart || 'Lunch Start'}
-            </Text>
-            <Icon name="keyboard-arrow-down" size={24} color="#9CA3AF" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.input,
-              styles.selectInput,
-              {flex: 1, marginLeft: 10},
-              errors.lunchEnd && styles.inputError,
-            ]}
-            onPress={() => setShowLunchPicker({type: 'end', show: true})}>
-            <Text
-              style={[
-                styles.selectText,
-                !formData.lunchEnd && styles.placeholder,
-              ]}>
-              {formData.lunchEnd || 'Lunch End'}
-            </Text>
-            <Icon name="keyboard-arrow-down" size={24} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
-        {errors.lunchStart && (
-          <Text style={styles.errorText}>{errors.lunchStart}</Text>
-        )}
-        {errors.lunchEnd && (
-          <Text style={styles.errorText}>{errors.lunchEnd}</Text>
-        )}
-      </View>
-    </ScrollView>
-  );
-
   const renderGSTStep = () => (
     <ScrollView
       style={styles.stepContainer}
@@ -959,8 +652,6 @@ const NewAddressScreen = ({navigation, route}) => {
       case 0:
         return renderAddressStep();
       case 1:
-        return renderTimingsStep();
-      case 2:
         return renderGSTStep();
       default:
         return null;
@@ -1018,10 +709,6 @@ const NewAddressScreen = ({navigation, route}) => {
           )}
         </TouchableOpacity>
       </View>
-
-      {/* Modals */}
-      {renderTimePicker()}
-      {renderLunchPicker()}
     </SafeAreaView>
   );
 };

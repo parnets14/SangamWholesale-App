@@ -12,7 +12,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '../../context/ThemeContext';
@@ -37,7 +37,6 @@ const CheckoutScreen = ({navigation, route}) => {
   const {user, token} = useAuth();
   const {items, total} = route.params;
   const {openRazorpay} = useRazorpay();
-  const insets = useSafeAreaInsets();
 
   // State management
   const [addresses, setAddresses] = useState([]);
@@ -283,14 +282,6 @@ const CheckoutScreen = ({navigation, route}) => {
     return `${address.shopName}, ${address.shopNumber}, ${address.areaName}, ${address.town}, ${address.city} - ${address.pincode}`;
   };
 
-  const formatShopTiming = address => {
-    if (!address) return '';
-    const lunchTime = address.lunchTime
-      ? ` (Lunch: ${address.lunchTime.lunchStart}-${address.lunchTime.lunchEnd})`
-      : '';
-    return `Opens: ${address.shopOpenTime}${lunchTime}`;
-  };
-
   const PaymentOption = ({
     method,
     icon,
@@ -436,11 +427,6 @@ const CheckoutScreen = ({navigation, route}) => {
               {selectedAddress?.deliveryContact}
             </Text>
           </View>
-          {selectedAddress?.shopOpenTime && (
-            <Text style={styles.shopTiming}>
-              {formatShopTiming(selectedAddress)}
-            </Text>
-          )}
         </View>
       </View>
     );
@@ -667,7 +653,7 @@ const CheckoutScreen = ({navigation, route}) => {
       </ScrollView>
 
       {/* Checkout Footer */}
-      <View style={[styles.footer, {paddingBottom: insets.bottom + 16}]}>
+      <View style={[styles.footer, {paddingBottom: 16}]}>
         <View style={styles.footerPrice}>
           <Text style={styles.footerTotal}>
             {'\u20B9'}{grandTotal.toLocaleString()}

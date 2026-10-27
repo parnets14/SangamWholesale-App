@@ -2,10 +2,9 @@
 import React from 'react';
 import {View, ScrollView, StyleSheet, Linking, StatusBar} from 'react-native';
 import {Button, Text} from 'react-native-paper';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const TermsOfUseScreen = ({navigation}) => {
-  const insets = useSafeAreaInsets();
   const handleAccept = () => {
     // Handle terms acceptance logic
     navigation.goBack();
@@ -47,7 +46,7 @@ const TermsOfUseScreen = ({navigation}) => {
         </Text>
       </ScrollView>
 
-      <View style={[styles.buttonContainer, {paddingBottom: 20 + insets.bottom}]}>
+      <View style={[styles.buttonContainer, {paddingBottom: 20}]}>
         <Button
           mode="contained"
           onPress={handleAccept}

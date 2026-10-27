@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
@@ -21,7 +21,6 @@ import {useAuth} from '../../context/AuthContext';
 const EditAddressesScreen = () => {
   const navigation = useNavigation();
   const {token} = useAuth();
-  const insets = useSafeAreaInsets();
 
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -172,16 +171,6 @@ const EditAddressesScreen = () => {
     setSelectedAddress(addressId);
   };
 
-  const formatTime = time => {
-    if (!time) return 'Not set';
-    return time;
-  };
-
-  const getDayStatus = (openClosedDays, day) => {
-    if (!openClosedDays || !openClosedDays[day]) return 'Unknown';
-    return openClosedDays[day] === 'open' ? 'Open' : 'Closed';
-  };
-
   const renderAddressCard = ({item}) => (
     <View style={styles.addressCard}>
       {/* Header */}
@@ -231,48 +220,6 @@ const EditAddressesScreen = () => {
           {item.city} - {item.pincode}
         </Text>
       </View>
-
-      {/* Business Hours */}
-      <View style={styles.businessInfo}>
-        <View style={styles.businessRow}>
-          <Icon name="clock" size={14} color="#666" />
-          <Text style={styles.businessText}>
-            Open: {formatTime(item.shopOpenTime)}
-          </Text>
-        </View>
-        {item.lunchTime && (
-          <View style={styles.businessRow}>
-            <Icon name="pause" size={14} color="#666" />
-            <Text style={styles.businessText}>
-              Lunch: {formatTime(item.lunchTime.lunchStart)} -{' '}
-              {formatTime(item.lunchTime.lunchEnd)}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Weekly Schedule */}
-      {item.openClosedDays && (
-        <View style={styles.scheduleContainer}>
-          <Text style={styles.scheduleTitle}>Weekly Schedule:</Text>
-          <View style={styles.scheduleGrid}>
-            {Object.entries(item.openClosedDays).map(([day, status]) => (
-              <View key={day} style={styles.dayStatus}>
-                <Text style={styles.dayText}>
-                  {day.charAt(0).toUpperCase() + day.slice(1)}
-                </Text>
-                <Text
-                  style={[
-                    styles.statusText,
-                    {color: status === 'open' ? '#10B981' : '#EF4444'},
-                  ]}>
-                  {status === 'open' ? 'Open' : 'Closed'}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
 
       {/* Status Row */}
       <View style={styles.statusRow}>
@@ -387,7 +334,7 @@ const EditAddressesScreen = () => {
 
         {/* Create New Address Button */}
         <TouchableOpacity
-          style={[styles.createAddressButton, {marginBottom: 20 + insets.bottom}]}
+          style={[styles.createAddressButton, {marginBottom: 20}]}
           onPress={handleCreateNewAddress}
           activeOpacity={0.7}>
           <Icon name="plus" size={20} color="#ffffff" />
